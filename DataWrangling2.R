@@ -67,7 +67,6 @@ names(CommunityCrime11)
 # Checking whether this worked out - it did.
 
 
-
 # Write table and save the data into the working directory for furher use in linear regression for nearly all of the variables.
 write.table(CommunityCrime11, file = "CommunityCrime11.txt", sep = ",", col.names = TRUE, row.names = TRUE)
 
