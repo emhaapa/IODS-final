@@ -32,7 +32,10 @@ The population and the sum of all crimes considered violent was used in calculat
 
 As for why I chose this particular data set out of all the ones available in UCI machine learning repository alone, there are many reasons. First of all,  I wanted to have a look on a different data to all of the sets we explored durng the course, and see what I could do on my own. Secondly, but notof inferior importance, I am very interested in crime related data in general, and the relationships of different aspects of population and socio economic variables affecting the crime rate especially in the US. This was only further accelerated by the glimpse we had on a data set called Boston (included in the MASS package of the R software) during the IODS course, however, I felt like I wanted to have a more widespread look on the crime in the US - and as I stumbled uppon the Communities and Crime data set, it felt like the perfect one to go on an explore in my final project. 
 
-As the process of this exploration went on, I noticed it turned out to include a multitude of missing values. In order to delve into Primary Component Analysis with regard to this data, I came into the conclusion of performing na.omit on the data in the process of doing this exercise. Furthermore, I decided to choose the unnormalized data set instead of the normalized version, also available in the UCI repository, because the values in the data matrix seemed to be more easily comprehensible and comparable, whereas in the normalized data set all od the values were in the range of 0 to 1. What is more, the normalization performed on the data, I was afraid, would have left some extreme observations out. I learned that while performing linear regression, no standardization or normalization is essentially necessary, since the parameters and their signifigance is relatively the same whether performed on a standardized or an unstandardized data set.
+As the process of this exploration went on, I noticed it turned out to include a multitude of missing values. In order to delve into Primary Component Analysis with regard to this data, I came into the conclusion of performing na.omit on the data in the process of doing this exercise. Furthermore, I decided to choose the unnormalized data set instead of the normalized version, also available in the UCI repository, because the values in the data matrix seemed to be more easily comprehensible and comparable, whereas in the normalized data set all od the values were in the range of 0 to 1. What is more, the normalization performed on the data, I was afraid, would have left some extreme observations out. I learned that while performing linear regression, no standardization or normalization is essentially necessary, since the parameters and their signifigance is relatively the same whether performed on a standardized or an unstandardized data set. Also, a normalization on the data would be easy to perform for example with the data.Normalization()-function from the clusterSim-package in the following way:
+CommunityCrime22_sn <- data.Normalization (CommunityCrime22,type="n4",normalization="column"),
+where type = "n4" refers to the type of normalization - in this case "n4 - unitization with zero minimum ((x-min)/range)".
+
 
 ## The data wrangling process on the Communities and Crime data
 
@@ -105,20 +108,13 @@ The public transport and people in dense household columns also seem to present 
 The income related columns - medIncome, perCapInc and PctPopUnderPov - are also worth exploring. The latter presents a wide range of values with a low minimum and a high maximum. The median and mean are quite close to each other but rather far from the maximum value: generally the percent of people under the poverty rate is close to 10 percent, whereas in some cities over half of the people are under the poverty rate. The per capita income variable ranges from approximately 5 000 to 65 000, which is quite a wide range, peaking, however, at around 15 000. So most of the cities has a 15 thousand income per capita, but there are exceptionally high values as well as some low values.
 Median income has an even wider range of approximately 9 000 to some 122 000, wen the mean and median are around 30 000 - so some outlier communities are definitely present in the data.
 
-Let's look at the distributions and correlations more visually with ggpairs():
+Let's look at the distributions and correlations more visually with ggpairs() and corrplot():
 ```{r, fig.height=25, fig.width=15, message=FALSE, warning=FALSE, cache=TRUE}
 library(GGally)
 
 ggpairs(CommunityCrime22, mapping = aes(), lower = list(combo = wrap("facethist", bins = 10)), upper = list(continuous = wrap("cor", size=3)))
 ```
 
-
-
-
-
-## PCA on the Community and Crime data
-
-Next, to reduce the dimensionality of this data set, let's perform Primary Component Analysis (PCA) on it.
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 CommunityCrime2211 <- na.omit(CommunityCrime22)
@@ -127,27 +123,43 @@ summary(CommunityCrime2211)
 corrplot(round(cor(CommunityCrime2211), digits = 2), method = "circle", type = "upper", tl.pos = "d", tl.cex = 0.8)
 ```
 
-Doesnt look like there's much correlation, except for some points.
+We can straight off see from the plots, that there isn't very much brightly standing out correlation with the variables in this data set with the supposed target variable, violent crimes per population. There is some slight correlation that can be detected from the latter corrplot, however, the variables correlate more strongly with each other than they do with violent crimes. The correlations are, however, the most obvious ones: for example the number of homeless people in the streets correlates positively with number of homeless in shelters, the latter two of which correlate positively with population, which somewhat confirms my initial ponderings of these being in connection. What is more, percent of foreign born correlates positively with percent of recently immigrated of population. Also percent of peopl eunder poverty rate correlates negatively with median income. Some of my earlier ponderings about foreign born people and dense housing being in connection turns out to be true looking at the corrplot-table: they seem to be in slight positive correlation.
+Since the purpose of this assignment is merely to exercise the abilities gained during this course, not necessarily to find interesting and eye-popping results, we can continue with this line of analysis despite the ggpairs- and corrplot presenting quite disillusioning results. 
+
+## PCA on the Community and Crime data
+
+Next, to reduce the dimensionality of this data set, I'll move on to perform Primary Component Analysis (PCA) on it. A Principal Component Analysis (abbreviated as PCA) can be conducted on the dataset to lower its dimensionality using the singular value decomposition (SVD) method. The SVD literally decomposes a matrix and produces a product of smaller matrices, which brings out the most important components, and in statistics, PCA aims to do exactly that. It represents the data at hand in two dimensions with respect to Principal components - the components which explain different proportions of variance of the original variables, or in other words, features. The first Principal component always explains the largest proportion of variance along the features, and the importance of the PC is relative to the order in which it is represented in the PCA: for example, PC2 explains the second largest proportion of variance and PC3 the third largest and so on. Usually only two principal components explain the most significant amount of variance, hece the two-dimensionality of the PCA and the resulting biplot (bi = two) with arrows representing the correlation between the variables with each other and with the two PCs. Consequently, the Principal components are also uncorrelated, which means that the angle between them is 90 degrees (which corresponds to a 0 correlation).
+
+To do that we need to convert the data set into a data frame and scale it - otherwise the skewed distributions of the variables and the differing variances would lead PCA to "perceive" the variables with larger variance as also more important, because PCA is impacted by the scaling of the features.
+  
+    
+
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
+library(clusterSim)
+CommunityCrime22111_s <- as.data.frame(scale(CommunityCrime2211))
 
-CommunityCrime2211_std <- as.data.frame(scale(CommunityCrime2211)) # Standardise.
-pcaCC2211_std <- prcomp(CommunityCrime2211_std) # Perform the PCA.
+summary(CommunityCrime22111_s)
+pcaCC2211_std <- prcomp(CommunityCrime22111_s) # Perform the PCA.
 sumpcaCC2211_std <- summary(pcaCC2211_std) # Summarise the results.
 sumpcaCC2211_std # Print summary.
 
 ```
 
+As we can see from the previous table, the Proportions of variance for the two first primary components (0,2793 and 0,1998) do not look very promising - essentially, the two first primary components explain less than half of the total variance - but let's continue on to drawing the biplot of this result.
 
 
-```{r, fig.height=25, fig.width=19, message=FALSE, warning=FALSE, cache=TRUE}
+```{r, fig.height=7, fig.width=7, message=FALSE, warning=FALSE, cache=TRUE}
 # Extract percentages of variance from the summary (for the plot titles).
 pr_CC2211s <- round(100*sumpcaCC2211_std$importance[2, ], digits = 1)
 pc_CC2211_lab <- paste0(names(pr_CC2211s), " (", pr_CC2211s, "%)") # Create plot axis titles.
 # Plot
-biplot(pcaCC2211_std, choices = 1:2, cex = c(0.7, 0.8), col = c("grey40", "deeppink2"), xlab = pc_CC2211_lab[1], ylab = pc_CC2211_lab[2])
+biplot(pcaCC2211_std, cex = c(0.8, 1), col = c("LightGray", "black"), xlab = pc_CC2211_lab[1], ylab = pc_CC2211_lab[2], xlim=c(-0.05, 0.11), ylim=c(-0.05, 0.1))
 ```
 
+
+
+With the initial settings the plot wasn't exactly readable; because of the quite remarkable outliers (New York, for example) that made the scale of the x- and y-axii very wide. That's why I used xlim and ylim to limit the range of the axii and produce a more readable biplot. Now, from the above plot we can see from the direction of the arrows, which features contribute to either of the primary components. Clearly, percent of people in dense housing, percent of male persons never married, percent of homeless as well as violent crimes per population (our target variable for linear regression) percent of people with lower than or 9th grade education and percent of African Amrican of the population correlate with the first principal component. Also percent of working moms with under 18 year old kids seems to fall in this category, however, the arrow points to the opposite direction. Features that contribute to both of the first primary components but might contribute more to the PC2, are percent of people under poverty rate, median and per capita income and percent of employed people, which all have to do with income related aspects. These include also percent of people using public transport, percent of recently immigrated of population, number of homeless, population and population density - population related features which also have to do with income. Furthermore, the angle between a single feature and the PC-axis can be interpreted as the correlation between these two, a small angle indicating strong positive correlation. This is very visual and makes the analysis part interesting: we can see from the plot that nearly all of the variables in connection with PC1 have relatively small angles and thus strong positive connection with PC1. Those ariables contributing to PC2 also have a small angle with the PC2-axis, so the correlation between the PC2 and them is also significantly positive. The arrows which are in a close to 90 degrees angle with either PC1 or PC2 have close to a 0 correlation with these PCs, so indeed for example labRatioFM doesn't correlate with PC1 - which is an element of PCA - the axii are uncorrelated. 
 
 ## Thoughts and hypotheses
 
@@ -230,7 +242,7 @@ s_st
 
 pr_sst <- round(100*s_st$importance[2, ], digits = 1)
 pc_sst_lab <- paste0(names(pr_sst), " (", pr_sst, "%)")
-biplot(pca_st, choices = 1:2, cex = c(0.6, 1), col = c("grey40", "deeppink2"), xlab = pc_sst_lab[1], ylab = pc_sst_lab[2])
+biplot(pca_st, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_sst_lab[1], ylab = pc_sst_lab[2])
 
 ```
 

@@ -11,3 +11,6 @@ purrr
 corrplot
 GGally
 stringr
+cluster
+MASS
+clusterSim
