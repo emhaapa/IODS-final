@@ -7,6 +7,7 @@ output:
     theme: sandstone
     toc: TRUE
     toc_depth: 3
+    toc_float: TRUE
     fig_caption: TRUE
     fig_width: 6
     fig_height: 4
@@ -31,7 +32,7 @@ The population and the sum of all crimes considered violent was used in calculat
 
 As for why I chose this particular data set out of all the ones available in UCI machine learning repository alone, there are many reasons. First of all,  I wanted to have a look on a different data to all of the sets we explored durng the course, and see what I could do on my own. Secondly, but notof inferior importance, I am very interested in crime related data in general, and the relationships of different aspects of population and socio economic variables affecting the crime rate especially in the US. This was only further accelerated by the glimpse we had on a data set called Boston (included in the MASS package of the R software) during the IODS course, however, I felt like I wanted to have a more widespread look on the crime in the US - and as I stumbled uppon the Communities and Crime data set, it felt like the perfect one to go on an explore in my final project. 
 
-As the process of this exploration went on, I sadly noticed that I couldn't perform all the statistical methods I would have wanted to on this data set, as it turned out to include a multitude of missing values in almost all columns, and performing na.omit() on the data resulted in only 200 or so observations remaining. Disillusioned about not being able (with my skill set) delve into Primary Component Analysis with regard to this data, I came into the conclusion of tackling the Linear regression approach instead.  I decided to choose the unnormalized data set instead of the normalized version, also available in the UCI repository, because the values in the data matrix seemed to be more easily comprehensible and comparable, whereas in the normalized data set all od the values were in the range of 0 to 1. What is more, the normalization performed on the data, I was afraid, would have left some extreme observations out. I learned that while performing linear regression, no standardization or normalization is essentially necessary, since the parameters and their signifigance is relatively the same whether performed on a standardized or an unstandardized data set.
+As the process of this exploration went on, I noticed it turned out to include a multitude of missing values. In order to delve into Primary Component Analysis with regard to this data, I came into the conclusion of performing na.omit on the data in the process of doing this exercise. Furthermore, I decided to choose the unnormalized data set instead of the normalized version, also available in the UCI repository, because the values in the data matrix seemed to be more easily comprehensible and comparable, whereas in the normalized data set all od the values were in the range of 0 to 1. What is more, the normalization performed on the data, I was afraid, would have left some extreme observations out. I learned that while performing linear regression, no standardization or normalization is essentially necessary, since the parameters and their signifigance is relatively the same whether performed on a standardized or an unstandardized data set.
 
 ## The data wrangling process on the Communities and Crime data
 
@@ -105,56 +106,46 @@ The income related columns - medIncome, perCapInc and PctPopUnderPov - are also 
 Median income has an even wider range of approximately 9 000 to some 122 000, wen the mean and median are around 30 000 - so some outlier communities are definitely present in the data.
 
 Let's look at the distributions and correlations more visually with ggpairs():
-```{r, fig.height=19, fig.width=20, message=FALSE, warning=FALSE, cache=TRUE}
+```{r, fig.height=25, fig.width=15, message=FALSE, warning=FALSE, cache=TRUE}
 library(GGally)
-library(ggplot2)
-library(gmodels)
-ggpairs(CommunityCrime22)
-```
 
-```{r, message=FALSE, warning=FALSE, cache=TRUE}
-p1 <- ggplot(CommunityCrime22, aes(x = racepctblack, y = ViolentCrimesPerPop))
-
-# define the visualization type (points)
-p2 <- p1 + geom_point()
-
-# add a regression line
-p3 <- p2 + geom_smooth(method = "lm")
-
-# add a main title and draw the plot
-p4 <- p3 + ggtitle("Percentage of Blacks versus Violent Crimes per capita")
-p4
-```
-
-```{r, message=FALSE, warning=FALSE, cache=TRUE}
-p11 <- ggplot(CommunityCrime22, aes(x = PctWorkMom, y = ViolentCrimesPerPop))
-
-# define the visualization type (points)
-p22 <- p1 + geom_point()
-
-# add a regression line
-p33 <- p2 + geom_smooth(method = "lm")
-
-# add a main title and draw the plot
-p44 <- p3 + ggtitle("Percentage of working moms vs Violent crimes per capita")
-p44
+ggpairs(CommunityCrime22, mapping = aes(), lower = list(combo = wrap("facethist", bins = 10)), upper = list(continuous = wrap("cor", size=3)))
 ```
 
 
+
+
+
+## PCA on the Community and Crime data
+
+Next, to reduce the dimensionality of this data set, let's perform Primary Component Analysis (PCA) on it.
+
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
-p111 <- ggplot(CommunityCrime22, aes(x = PctPopUnderPov, y = ViolentCrimesPerPop))
+CommunityCrime2211 <- na.omit(CommunityCrime22)
+summary(CommunityCrime2211)
 
-# define the visualization type (points)
-p222 <- p1 + geom_point()
+corrplot(round(cor(CommunityCrime2211), digits = 2), method = "circle", type = "upper", tl.pos = "d", tl.cex = 0.8)
+```
 
-# add a regression line
-p333 <- p2 + geom_smooth(method = "lm")
+Doesnt look like there's much correlation, except for some points.
 
-# add a main title and draw the plot
-p444 <- p3 + ggtitle("percentage of people under the poverty level versus Violent crimes per capita")
-p444
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+
+CommunityCrime2211_std <- as.data.frame(scale(CommunityCrime2211)) # Standardise.
+pcaCC2211_std <- prcomp(CommunityCrime2211_std) # Perform the PCA.
+sumpcaCC2211_std <- summary(pcaCC2211_std) # Summarise the results.
+sumpcaCC2211_std # Print summary.
+
+```
 
 
+
+```{r, fig.height=25, fig.width=19, message=FALSE, warning=FALSE, cache=TRUE}
+# Extract percentages of variance from the summary (for the plot titles).
+pr_CC2211s <- round(100*sumpcaCC2211_std$importance[2, ], digits = 1)
+pc_CC2211_lab <- paste0(names(pr_CC2211s), " (", pr_CC2211s, "%)") # Create plot axis titles.
+# Plot
+biplot(pcaCC2211_std, choices = 1:2, cex = c(0.7, 0.8), col = c("grey40", "deeppink2"), xlab = pc_CC2211_lab[1], ylab = pc_CC2211_lab[2])
 ```
 
 
@@ -193,15 +184,33 @@ summary(my_model4)
 
 ## Conclusions
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## PCA on the Boston data (if there is time)
 
 ```{r, message=FALSE, warning=FALSE}
 library(MASS)
 data(Boston)
-
+library(corrplot)
+library(GGally)
 ggpairs(Boston)
 corrplot(round(cor(Boston), digits = 2), method = "circle", type = "upper", tl.pos = "d", tl.cex = 0.8)
 ```
+
 ```{r, fig.height=10.7, fig.width=19, message=FALSE, warning=FALSE}
 pca_boston <- prcomp(Boston)
 s_nonst <- summary(pca_boston)
@@ -223,13 +232,5 @@ pr_sst <- round(100*s_st$importance[2, ], digits = 1)
 pc_sst_lab <- paste0(names(pr_sst), " (", pr_sst, "%)")
 biplot(pca_st, choices = 1:2, cex = c(0.6, 1), col = c("grey40", "deeppink2"), xlab = pc_sst_lab[1], ylab = pc_sst_lab[2])
 
-```
-
-```{r}
-cor_matrix<-cor(boston_st)
-
-# print the correlation matrix
-cor_matrix <- cor_matrix%>%round(2)
-cor_matrix
 ```
 
