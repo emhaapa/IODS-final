@@ -12,7 +12,6 @@ output:
     fig_width: 6
     fig_height: 4
     code_folding: hide
-    encoding: UTF-8
 ---
 
 ```{r setup, include=FALSE}
@@ -225,12 +224,12 @@ summary(CC22_lm1)
 ```
 
 
-KORJAA T��:
+KORJAA TÄÄ:
 reading from the table, the first estimate, i.e. the beta-parameter, is 3,5255 which indicates a strong positive influence on points. So a good attitude correlates with good points, simply said. The p-value for deep is 0.897, which is not at all a good p-value - it is significantly greater than 0,1, so the influence of deep on points cannot be considered statistically significant. For stra, the p-value is 0.0603, which is pretty good - it is close to 0,05 and definitely less than 0,1.
-The summary-table shows the beta-parameters for each of the aforementioned variables, and also that the p-value for 'attitude' is 0,0000000193 - which is by all means strictly less than 0,05! Now, with this model, at least for the attitude parameter, the probability of making a Type I -error (discarding error) is very little. For the other parameters, stra and surf, both have >0,1 p-values, which gives the results signifigance level to be quite low and the probability of making the Type I -error (of discaring the null hypothesis) slightly greater.
+The summary-table shows the beta-parameters for each of the aforementioned variables, and also that the p-value for ‘attitude’ is 0,0000000193 - which is by all means strictly less than 0,05! Now, with this model, at least for the attitude parameter, the probability of making a Type I -error (discarding error) is very little. For the other parameters, stra and surf, both have >0,1 p-values, which gives the results signifigance level to be quite low and the probability of making the Type I -error (of discaring the null hypothesis) slightly greater.
 The model parameters can be read from the summary-table. The alpha-parameter indicates, where the regression line intercepts the y-axis. In this case it is 8,9729. The beta-parameter for attitude in this model is 3,4658, which indicates a strong positive influence of attitude on exam points, i. e. the explanatory and target variable. The beta-parameter can be viewed as the slope of the curve which indicates the influence of this variable on the target variable; in this case the line is ascending. In the case of the stra-variable, the beta-parameter is a little bit smaller in value, but still positive, so it can be said that the strategic learning style has a positive influence on exam points - only a bit lesser of an influence than the attitude-variable has.
 
-**R-squared** is a statistical measure of how close the data are to the fitted regression line. It is also known as 'the coefficient of determination', or 'the coefficient of multiple determination' for multiple regression, as in this case. By definition, R-squared is the percentage of the response variable variation that is explained by a linear model. In other words: how well the model explains the main variables variation, as opposed to other factors that might affect the main variable. It can be written as
+**R-squared** is a statistical measure of how close the data are to the fitted regression line. It is also known as ‘the coefficient of determination’, or ‘the coefficient of multiple determination’ for multiple regression, as in this case. By definition, R-squared is the percentage of the response variable variation that is explained by a linear model. In other words: how well the model explains the main variables variation, as opposed to other factors that might affect the main variable. It can be written as
 
 R-squared = Explained variation / total variation
 
@@ -258,7 +257,7 @@ The Residuals vs. Fitted values -plot explores the constant variance assumption 
 In the plot of the model, the points seem to be distributed quite randomly, and no actual pattern can really be seen. The curve fitted to these points is also rather vertical, with no deviation or slope differing from 1, so it is a good sign that there is no dependency of the errors on the explanatory variables. In this case, I would say that the variance seems to be constant, and this assumption of the linear model holds true.
 
 **The Normal QQ-plot**
-The Normal QQ-plot is a plot of the residuals that can be used to explore the assumption of the normality of the errors in the model. In the Normal QQ-plot of the model in question, the points of the plot seem to fall pretty nicely on the curve, and nothing seems to deviate out of the line. Consequently, according to this graphical model validation plot, the model's errors are (at least close to being) normally distributed and the normality assumption is correct.
+The Normal QQ-plot is a plot of the residuals that can be used to explore the assumption of the normality of the errors in the model. In the Normal QQ-plot of the model in question, the points of the plot seem to fall pretty nicely on the curve, and nothing seems to deviate out of the line. Consequently, according to this graphical model validation plot, the model’s errors are (at least close to being) normally distributed and the normality assumption is correct.
 
 **The Residual vs. Leverage -plot**
 
