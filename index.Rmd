@@ -2,29 +2,234 @@
 title: "Final Assignment"
 author: "Emma Haapa"
 date: "3 maaliskuuta 2017"
-output: html_document
+output: 
+  html_document:
+    theme: sandstone
+    toc: TRUE
+    toc_depth: 3
+    fig_caption: TRUE
+    fig_width: 6
+    fig_height: 4
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Final assignment: Linear regression on Communities and Crime dataset{#anchor}
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+![optional caption text](stock-photo-financial-fraud-concept-145382752.jpg)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+This Course diary is related to the final assignment for the purpose of the course Introduction to Open Data Science of University of Helsinki, spring 2017. The aim of this assignment is to perform linear regression on the "Communities and crime"" dataset found in the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime) and validate the produced model through the model validation process introduced during the course.
 
-```{r cars}
-summary(cars)
+## The Communities and Crime data
+
+The data is the unnormalized version of the Communities and crime data set of Michael Redmond for Computer Science in La Salle University, Philadelphia, PA, USA. It describes the different aspects of crime and socio economic surroundings containing variables that might affect the crime rate in the U.S. communities. The dataset includes socio economic data from 1990 US Census, crime data from 1995 US FBI Uniform Crime Report and law enforcement data from 1990 US Law Enforcement Management and Administrative Statistics Survey (LEMAS), available from ICPSR at University of Michigan. The number of oservations in this dataset is 1994 and there are in total 128 variables, of which one - the total percentage of violent crimes - is considered a possible target variable and 5 non-predicive variables, such as state, county, community and community name. The rest of the 122 variables are considered predictive variables, among them for example the percentage of blacks in the community, the percentage of working moms and the number of officers assigned to special drug units. 
+
+The population and the sum of all crimes considered violent was used in calculating the goal variable, per capita violent crimes. The interesting part in this process, according to the UCI Machine learning repository's data information page, was that there was controversy as to which kind of crimes diffeent states considered violent, which in turn led to numerous missing values in the data. Nearly all cities regarded murder, robbery, and assault as violent crimes, but some cities in midwestern states did not consider it necessary to add rape to this list, hence they were not included in the final Communities and crime data set. Before omitting those cities the "rapes" column had multiple missing values and that consequently resulted in misinterpreted values for the target variable. What I'd like to add, the rapes column still seems to 
+
+As for why I chose this particular data set out of all the ones available in UCI machine learning repository alone, there are many reasons. First of all,  I wanted to have a look on a different data to all of the sets we explored durng the course, and see what I could do on my own. Secondly, but notof inferior importance, I am very interested in crime related data in general, and the relationships of different aspects of population and socio economic variables affecting the crime rate especially in the US. This was only further accelerated by the glimpse we had on a data set called Boston (included in the MASS package of the R software) during the IODS course, however, I felt like I wanted to have a more widespread look on the crime in the US - and as I stumbled uppon the Communities and Crime data set, it felt like the perfect one to go on an explore in my final project. 
+
+As the process of this exploration went on, I sadly noticed that I couldn't perform all the statistical methods I would have wanted to on this data set, as it turned out to include a multitude of missing values in almost all columns, and performing na.omit() on the data resulted in only 200 or so observations remaining. Disillusioned about not being able (with my skill set) delve into Primary Component Analysis with regard to this data, I came into the conclusion of tackling the Linear regression approach instead.  I decided to choose the unnormalized data set instead of the normalized version, also available in the UCI repository, because the values in the data matrix seemed to be more easily comprehensible and comparable, whereas in the normalized data set all od the values were in the range of 0 to 1. What is more, the normalization performed on the data, I was afraid, would have left some extreme observations out. I learned that while performing linear regression, no standardization or normalization is essentially necessary, since the parameters and their signifigance is relatively the same whether performed on a standardized or an unstandardized data set.
+
+## The data wrangling process on the Communities and Crime data
+
+The data available in the UCI repository didn't contain names for the variables at all; they were only given in the description of the data in a list with descriptions of the variables included. Accordingly, before any data wrangling could be done, I created a list of column names in a separate .txt-file where I removed all other information in the variables list found on the data information page. In the R scrip where the data wrangling was done, i then assigned the column names in the data to be taken from this columnnames.txt-data, that I put saved into a separate object.
+The actual data wrangling process for this data set consisted of removing columns with numerous missing values and omitting some non-predictive variables that are not of interest in building a linear regression model (those included for example county, community and community name). In this phase, I created a data set called CommunityCrime11 that included all of the remaining variables, for my interest in fitting a linear regression model on all the variables. Furthermore, in the finalized data set I only kept some interesting variables that I hypothesized to have some kind of significant effect on the total crime variable. Those, accompanied with their descriptions found on the [data information page](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime+Unnormalized#) in the following list, were:
+
+* **"ViolentCrimesPerPop"** =  total number of violent crimes per 100K popuation
+* **"population"** =  population for community
+* **"PctForeignBorn"** = percent of people foreign born
+* **"NumInShelters"** = number of people in homeless shelters
+* **"NumStreet"** = number of homeless people counted in the street
+* **"PctHomeless"** = number of homeless people in homeless shelters plus homeless in the street divided by population times 100
+* **"PopDens"** = population density in persons per square mile
+* **"perCapInc"** = per capita income
+* **"medIncome"** =  median household income
+* **"PctLess9thGrade"** = percentage of people 25 and over with less than a 9th grade education
+* **"PctRecentImmig"** = percent of population who have immigrated within the last 3 years
+* **"racepctblack"** = percentage of population that is african american
+* **"PctEmploy"** = percentage of people 16 and over who are employed
+* **"MalePctNevMarr"** = percentage of males who have never married 
+* **"PctWorkMom"** = percentage of moms of kids under 18 in labor force
+* **"PctPopUnderPov"** = percentage of people under the poverty level 
+* **"PctPersDenseHous"** = percent of persons in dense housing (more than 1 person per room) 
+* **"PctUsePubTrans"** = percent of people using public transit for commuting 
+
+As a side not, among all other interesting variables not included in the final data set, there was also a variable in the original data called **"RacialMatchCommPol"** = a measure of the racial match between the community and the police force, high values indicate proportions in community and police force are similar, which initially seemed quite interesting in terms of analysis. However, I decided not to include it in my wrangled data set as it contained a high number of missing values and in the end didn't seem to provide any information for some of the communities included in the data.
+
+I also wanted the row names of this data to be distinctified by the community names followed by the state column's character string indicating in which state this community is in, so I assigned the row names to be taken from those two columns and subsequently removed them from the dataset. The more tidy and comprehensible data set resulting from this data wrangling I called CommunityCrime22.
+
+
+## Looking into the data: plots and tables
+
+First off, let's have a peek at the latter, smaller data with the variables mentioned in the preceding list through tables and plots.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
+# Accessing libraries:
+library(gmodels)
+library(gdata)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(tidyr) 
+library(tidyverse)
+library(corrplot)
+library(GGally)
+library(stringr)
+options(max.print=1000000)
+
+CommunityCrime22 <- read.table('CommunityCrime22.txt', sep=",", header = TRUE)
+rownames(CommunityCrime22)
+str(CommunityCrime22)
+glimpse(CommunityCrime22)
+
 ```
 
-## Including Plots
+As we can see from the initial exploration done with R's rownames()- and glimpse()-functions, the row names actually do correspond with the communities in question and we can also have a look at which kind of values the included variables get: mostly numerical values. Let's now look at the summary of the data:
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+summary(CommunityCrime22)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+We can first spot that only the target variable ViolentCrimesPerPop includes missing values, 221 of them in total. This, among other reasons, is due to the missing values in rapes-column, which was whopping looking at the separate rapes-column in the original data set. Moreover, the values of violent crimes per population range from zero to almost 5 000 with a median at around 374, which tells us that there is variation between cities: some of them have a high rate of violent crimes whereas some of the cities don't seem to have violent crimes at all (minimum at zero). 
+From the summary of the population column it can be concluded that the data included small communities with as little as 10 005 in population, and also very large communities with a high number of people going up to over 7,3 million. This also affects the population density, which varies from 10 persons per square mile to a staggering 44 230 persons per square mile. What is interesting in the percent of foreign born people -column, is that it varies significantly: some communities have only 0,18 percent of foreign born recidents whereas the maximum is as high as 60,4 percent - more than a half of the people are foreign born in some communities. The same goes for racepctblack, the percent of people of African American heritage: the minimum is a straight zero, the median and mean are both quite low, but the maximum is 96,67 (!), extremely high.
+
+The next interesting columns are the number of homeless people in shelters - NumInShelters - and number of homeless people found in the streets - NumStreet - columns. We can see that the median for both is 0,00 and the mean for the first is 66,95 and for the latter 17,82. This tells about a significantly uneven distribution of homeless people in the communities - some communities have a large amount of homeless people, and most have none. The maximum values are high compared to the mean value: for homeless in shelters it is 23 383 and for homeless in the streets 10 447. This may be due to some communities being more urban and more populated, whereas there are many small, "countryside" communities (for example from the midwestern USA) in the data that probably have a smaller number of homeless people around (and people in general, for that matter).
+
+The public transport and people in dense household columns also seem to present a rather skewed distribution or distributions containing outliers based on the median, mean and maximum values; for the public transport the median is 1,2 when the maximum is 54,33 and for dense households the median 2,3, the mean 4,1 and the maximum over 59 percent. This may be a result of the same reason for why the homeless people distribute so unevenly: small townships have little to no public transport, when in turn people in bigger, more populated cities use public transport that is available from every corner, going to every place in the neighbourhood and moreover, people have to be more densely habitated in bigger cities where the population density is high. It can also be speculated that the reason for people in dense households may be due to people with low income, big families or different culture (foreign born citizens) which in turn might be in connection with each other and result in more people residing under the same roof. This, of course, is merely speculation.
+
+The income related columns - medIncome, perCapInc and PctPopUnderPov - are also worth exploring. The latter presents a wide range of values with a low minimum and a high maximum. The median and mean are quite close to each other but rather far from the maximum value: generally the percent of people under the poverty rate is close to 10 percent, whereas in some cities over half of the people are under the poverty rate. The per capita income variable ranges from approximately 5 000 to 65 000, which is quite a wide range, peaking, however, at around 15 000. So most of the cities has a 15 thousand income per capita, but there are exceptionally high values as well as some low values.
+Median income has an even wider range of approximately 9 000 to some 122 000, wen the mean and median are around 30 000 - so some outlier communities are definitely present in the data.
+
+Let's look at the distributions and correlations more visually with ggpairs():
+```{r, fig.height=19, fig.width=20, message=FALSE, warning=FALSE, cache=TRUE}
+library(GGally)
+library(ggplot2)
+library(gmodels)
+ggpairs(CommunityCrime22)
+```
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+p1 <- ggplot(CommunityCrime22, aes(x = racepctblack, y = ViolentCrimesPerPop))
+
+# define the visualization type (points)
+p2 <- p1 + geom_point()
+
+# add a regression line
+p3 <- p2 + geom_smooth(method = "lm")
+
+# add a main title and draw the plot
+p4 <- p3 + ggtitle("Percentage of Blacks versus Violent Crimes per capita")
+p4
+```
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+p11 <- ggplot(CommunityCrime22, aes(x = PctWorkMom, y = ViolentCrimesPerPop))
+
+# define the visualization type (points)
+p22 <- p1 + geom_point()
+
+# add a regression line
+p33 <- p2 + geom_smooth(method = "lm")
+
+# add a main title and draw the plot
+p44 <- p3 + ggtitle("Percentage of working moms vs Violent crimes per capita")
+p44
+```
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+p111 <- ggplot(CommunityCrime22, aes(x = PctPopUnderPov, y = ViolentCrimesPerPop))
+
+# define the visualization type (points)
+p222 <- p1 + geom_point()
+
+# add a regression line
+p333 <- p2 + geom_smooth(method = "lm")
+
+# add a main title and draw the plot
+p444 <- p3 + ggtitle("percentage of people under the poverty level versus Violent crimes per capita")
+p444
+
+
+```
+
+
+## Thoughts and hypotheses
+
+Some Text.
+
+## Linear regression on the dataset
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+
+library(ggplot2)
+library(GGally)
+# create an plot matrix with ggpairs()
+ggpairs(CommunityCrime22, lower = list(combo = wrap("facethist", bins = 20)))
+
+# create a regression model with multiple explanatory variables
+my_model4 <- lm(ViolentCrimesPerPop ~ NumStreet + NumInShelters + racepctblack, data = CommunityCrime22)
+
+# print out a summary of the model
+summary(my_model4)
+
+
+# create an plot matrix with ggpairs()
+ggpairs(CommunityCrime22, lower = list(combo = wrap("facethist", bins = 20)))
+
+# create a regression model with multiple explanatory variables
+my_model4 <- lm(ViolentCrimesPerPop ~ NumStreet + NumInShelters + racepctblack + PctEmploy + MalePctNevMarr + PctWorkMom, data = CommunityCrime22)
+
+# print out a summary of the model
+summary(my_model4)
+```
+
+
+## Model validation
+
+## Conclusions
+
+## PCA on the Boston data (if there is time)
+
+```{r, message=FALSE, warning=FALSE}
+library(MASS)
+data(Boston)
+
+ggpairs(Boston)
+corrplot(round(cor(Boston), digits = 2), method = "circle", type = "upper", tl.pos = "d", tl.cex = 0.8)
+```
+```{r, fig.height=10.7, fig.width=19, message=FALSE, warning=FALSE}
+pca_boston <- prcomp(Boston)
+s_nonst <- summary(pca_boston)
+s_nonst
+
+pr_snonst <- round(100*s_nonst$importance[2, ], digits = 1)
+pc_snonst_lab <- paste0(names(pr_snonst), " (", pr_snonst, "%)")
+biplot(pca_boston, choices = 1:2, cex = c(0.6, 1), col = c("grey40", "deeppink2"), xlab = pc_snonst_lab[1], ylab = pc_snonst_lab[2])
+```
+
+
+```{r, fig.height=10.7, fig.width=19, message=FALSE, warning=FALSE}
+boston_st <- scale(Boston)
+pca_st <- prcomp(boston_st)
+s_st <- summary(pca_st)
+s_st
+
+pr_sst <- round(100*s_st$importance[2, ], digits = 1)
+pc_sst_lab <- paste0(names(pr_sst), " (", pr_sst, "%)")
+biplot(pca_st, choices = 1:2, cex = c(0.6, 1), col = c("grey40", "deeppink2"), xlab = pc_sst_lab[1], ylab = pc_sst_lab[2])
+
+```
+
+```{r}
+cor_matrix<-cor(boston_st)
+
+# print the correlation matrix
+cor_matrix <- cor_matrix%>%round(2)
+cor_matrix
+```
+

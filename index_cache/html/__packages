@@ -1,0 +1,13 @@
+base
+gmodels
+gdata
+dplyr
+ggplot2
+readr
+tidyr
+tidyverse
+tibble
+purrr
+corrplot
+GGally
+stringr
