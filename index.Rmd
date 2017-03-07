@@ -42,7 +42,7 @@ where type = "n4" refers to the type of normalization - in this case "n4 - uniti
 The data available in the UCI repository didn't contain names for the variables at all; they were only given in the description of the data in a list with descriptions of the variables included. Accordingly, before any data wrangling could be done, I created a list of column names in a separate .txt-file where I removed all other information in the variables list found on the data information page. In the R scrip where the data wrangling was done, i then assigned the column names in the data to be taken from this columnnames.txt-data, that I put saved into a separate object.
 The actual data wrangling process for this data set consisted of removing columns with numerous missing values and omitting some non-predictive variables that are not of interest in building a linear regression model (those included for example county, community and community name). In this phase, I created a data set called CommunityCrime11 that included all of the remaining variables, for my interest in fitting a linear regression model on all the variables. Furthermore, in the finalized data set I only kept some interesting variables that I hypothesized to have some kind of significant effect on the total crime variable. Those, accompanied with their descriptions found on the [data information page](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime+Unnormalized#) in the following list, were:
 
-* **"ViolentCrimesPerPop"** =  total number of violent crimes per 100K popuation
+* **"ViolentCrimesPerPop"** =  total number of violent crimes per 100K population
 * **"population"** =  population for community
 * **"PctForeignBorn"** = percent of people foreign born
 * **"NumInShelters"** = number of people in homeless shelters
@@ -159,40 +159,112 @@ biplot(pcaCC2211_std, cex = c(0.8, 1), col = c("LightGray", "black"), xlab = pc_
 
 
 
-With the initial settings the plot wasn't exactly readable; because of the quite remarkable outliers (New York, for example) that made the scale of the x- and y-axii very wide. That's why I used xlim and ylim to limit the range of the axii and produce a more readable biplot. Now, from the above plot we can see from the direction of the arrows, which features contribute to either of the primary components. Clearly, percent of people in dense housing, percent of male persons never married, percent of homeless as well as violent crimes per population (our target variable for linear regression) percent of people with lower than or 9th grade education and percent of African Amrican of the population correlate with the first principal component. Also percent of working moms with under 18 year old kids seems to fall in this category, however, the arrow points to the opposite direction. Features that contribute to both of the first primary components but might contribute more to the PC2, are percent of people under poverty rate, median and per capita income and percent of employed people, which all have to do with income related aspects. These include also percent of people using public transport, percent of recently immigrated of population, number of homeless, population and population density - population related features which also have to do with income. Furthermore, the angle between a single feature and the PC-axis can be interpreted as the correlation between these two, a small angle indicating strong positive correlation. This is very visual and makes the analysis part interesting: we can see from the plot that nearly all of the variables in connection with PC1 have relatively small angles and thus strong positive connection with PC1. Those ariables contributing to PC2 also have a small angle with the PC2-axis, so the correlation between the PC2 and them is also significantly positive. The arrows which are in a close to 90 degrees angle with either PC1 or PC2 have close to a 0 correlation with these PCs, so indeed for example labRatioFM doesn't correlate with PC1 - which is an element of PCA - the axii are uncorrelated. 
+With the initial settings the plot wasn't exactly readable; because of the quite remarkable outliers (New York, for example) that made the scale of the x- and y-axii very wide. That's why I used xlim and ylim to limit the range of the axii and produce a more readable biplot. Now, from the above plot we can see from the direction of the arrows, which features contribute to either of the primary components. Clearly, percent of people in dense housing, percent of male persons never married, percent of homeless as well as violent crimes per population (our target variable for linear regression) percent of people with lower than or 9th grade education and percent of African Amrican of the population correlate with the first principal component. Also percent of working moms with under 18 year old kids seems to fall in this category, however, the arrow points to the opposite direction. Features that contribute to both of the first primary components but might contribute more to the PC2, are percent of people under poverty rate, median and per capita income and percent of employed people, which all have to do with income related aspects. These include also percent of people using public transport, percent of recently immigrated of population, number of homeless in the streets and in shelters, population and population density - population related features which also have to do with income. Furthermore, the angle between a single feature and the PC-axis can be interpreted as the correlation between these two, a small angle indicating strong positive correlation. The arrows which are in a close to 90 degrees angle with either PC1 or PC2 have close to a 0 correlation with these PCs, so only for percent of people in dense housing, percent of male persons never married, percent of homeless as well as violent crimes per population we can say for sure they are in almost no correlation with PC2, having only a small angle with PC1. 
+
+From the biplot we can also read the correlations _between_ the variables. For example, percent of people in dense housing, percent of male persons never married and percent of homeless seem to be in positive correlation with each other since the angle between them is nonexistent. There is also positive correlation between violent crime per population and the aforementioned features and percent of people with lower than or 9th grade education and percent of African Amrican of the population as well as percent of people under poverty rate seem to be in positive correlation with the target variable. The target variable and the income variables described plus the percent of employed people variable are in negative correlation: the corresponding arrows point to opposite directions.
+
 
 ## Thoughts and hypotheses
+ 
+From the Primary Component Analysis conducted in the previous passage, as well as from my own initial hypotheses, I concluded that I could attempt to fit the linear model based on the following variables: 
 
-Some Text.
+
+* **"ViolentCrimesPerPop"** =  total number of violent crimes per 100K population (as the target variable, to be explained)
+* **"PctHomeless"** = number of homeless people in homeless shelters plus homeless in the street divided by population times 100
+* **"perCapInc"** = per capita income
+* **"PctLess9thGrade"** = percentage of people 25 and over with less than a 9th grade education
+* **"racepctblack"** = percentage of population that is african american
+* **"PctEmploy"** = percentage of people 16 and over who are employed
+* **"MalePctNevMarr"** = percentage of males who have never married 
+* **"PctWorkMom"** = percentage of moms of kids under 18 in labor force
+* **"PctPopUnderPov"** = percentage of people under the poverty level 
+* **"PctPersDenseHous"** = percent of persons in dense housing (more than 1 person per room) 
+
+My hypothesis at this point is that all of the above variables have a significant linear relationship with the target variable.
+
 
 ## Linear regression on the dataset
+
+Linear regression provides a means to create simple statistical models that attempt to explain the relationship between a target variable and one or more explanatory variables, called simple regression and multiple regression, respectively. The linear model explains only a linear relationship between the variables, not any other kind of relationship or correlation, which encourages me to attempt to fit a model on this data despite the low correlations. The idea in the interpretation of the model is to look at the parameters - the intercept, which is called the alpha-parameter, and the "slope" which is called the beta-parameter and can be interpreted as the coefficient of the linear dependency between the explanatory variable and the target variable. 
+
+The validation of the soon produced model tackles the assumptions, on which the model is based - these include for example the normality and constant variance of the errors. The linear model in R can be fitted with lm()-function and the parameters of the model can be read from the summary-table produced by the regular summary-function:
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 library(ggplot2)
 library(GGally)
-# create an plot matrix with ggpairs()
-ggpairs(CommunityCrime22, lower = list(combo = wrap("facethist", bins = 20)))
 
 # create a regression model with multiple explanatory variables
-my_model4 <- lm(ViolentCrimesPerPop ~ NumStreet + NumInShelters + racepctblack, data = CommunityCrime22)
+my_model4 <- lm(ViolentCrimesPerPop ~ racepctblack + PctHomeless + PctEmploy + PctWorkMom + PctPersDenseHous + PctPopUnderPov + perCapInc + MalePctNevMarr+  PctLess9thGrade, data = CommunityCrime22)
 
 # print out a summary of the model
 summary(my_model4)
 
+```
 
-# create an plot matrix with ggpairs()
-ggpairs(CommunityCrime22, lower = list(combo = wrap("facethist", bins = 20)))
+We can see from the summary-table that this initial approach didn't produce parameters corresponding to the variables that would all statistically significantly differ from zero. We can see that from the p-value column of the summary table: the statistical test produced p-values that aren't significant on any common significancy level, represented by * (stars) in the end of the rows. The statistical test related to the parameters is namely a test for the null-hypothesis that the beta-parameter in the regression model is actually zero. The p-value indicates the probability of that happening, using this statistical model. The influence of an explanatory variable is statistically significant, if it (in general) is <0,05. The highest value the p-value could take to be statistically at least somewhat significant, is 0,1.
 
+In the above summary-table, we can see that there are three variables, percent of people under poverty rate, per capita income and percent of male persons never married, for which the statistical test for the beta-parameter produced p-values that were under the generally used significancy levels.We can try to fit the model without these variables and see where it takes us, or remove a variable at a time. I tried both approaches, and it resulted in two equally nice models, one where I removed PctPopUnderPov + perCapInc + MalePctNevMarr+ +  PctLess9thGrade (first I removed all of the insignificant ones and was left with another insignificant variable, PctLess9thGrade, which I subsequently removed) and one where I removed PctLess9thGrade, MalePctNevMarr and PerCapInc, one at a time, which indicates that the percent of population under pverty rate doesn't influence the model in a significant way. Let's print the summary of the first model.
+
+
+```{r, message=FALSE, warning=FALSE}
 # create a regression model with multiple explanatory variables
-my_model4 <- lm(ViolentCrimesPerPop ~ NumStreet + NumInShelters + racepctblack + PctEmploy + MalePctNevMarr + PctWorkMom, data = CommunityCrime22)
+CC22_lm <- lm(ViolentCrimesPerPop ~ racepctblack + PctHomeless + PctEmploy + PctWorkMom + PctPersDenseHous, data = CommunityCrime22)
 
 # print out a summary of the model
 summary(my_model4)
 ```
 
+```{r, message=FALSE, warning=FALSE}
+# create a regression model with multiple explanatory variables
+CC22_lm1 <- lm(ViolentCrimesPerPop ~ racepctblack + NumStreet+ PctWorkMom + MalePctNevMarr + perCapInc, data = CommunityCrime22)
+ + PctEmploy 
+# print out a summary of the model
+summary(CC22_lm1)
+```
+
+
+KORJAA TÄÄ:
+reading from the table, the first estimate, i.e. the beta-parameter, is 3,5255 which indicates a strong positive influence on points. So a good attitude correlates with good points, simply said. The p-value for deep is 0.897, which is not at all a good p-value - it is significantly greater than 0,1, so the influence of deep on points cannot be considered statistically significant. For stra, the p-value is 0.0603, which is pretty good - it is close to 0,05 and definitely less than 0,1.
+The summary-table shows the beta-parameters for each of the aforementioned variables, and also that the p-value for 'attitude' is 0,0000000193 - which is by all means strictly less than 0,05! Now, with this model, at least for the attitude parameter, the probability of making a Type I -error (discarding error) is very little. For the other parameters, stra and surf, both have >0,1 p-values, which gives the results signifigance level to be quite low and the probability of making the Type I -error (of discaring the null hypothesis) slightly greater.
+The model parameters can be read from the summary-table. The alpha-parameter indicates, where the regression line intercepts the y-axis. In this case it is 8,9729. The beta-parameter for attitude in this model is 3,4658, which indicates a strong positive influence of attitude on exam points, i. e. the explanatory and target variable. The beta-parameter can be viewed as the slope of the curve which indicates the influence of this variable on the target variable; in this case the line is ascending. In the case of the stra-variable, the beta-parameter is a little bit smaller in value, but still positive, so it can be said that the strategic learning style has a positive influence on exam points - only a bit lesser of an influence than the attitude-variable has.
+
+**R-squared** is a statistical measure of how close the data are to the fitted regression line. It is also known as 'the coefficient of determination', or 'the coefficient of multiple determination' for multiple regression, as in this case. By definition, R-squared is the percentage of the response variable variation that is explained by a linear model. In other words: how well the model explains the main variables variation, as opposed to other factors that might affect the main variable. It can be written as
+
+R-squared = Explained variation / total variation
+
+R-squared is always between 0 and 100%: If R-squared is 0% that indicates the model explains none of the variability of the response data around its mean. If R-squared is 100% that indicates that the model explains all the variability of the response data around its mean.
+
+In general, the higher the R-squared, the better. Taking into consideration this notion, the multiple R-squared is 0,5538 and the Adjusted R-squared is 0,5527 (not remarkably lower, which indicated that the moel's variables explain (eti se sas tiedosto) adding a random variable in the model doesn't )
+
 
 ## Model validation
+
+In this chapter we will graphically validate the model.
+
+```{r, message=FALSE, warning=FALSE}
+
+plot(CC22_lm1, which = c(2))
+
+```
+
+
+In linear regression the assumptions include that the target variable is assumed to be a linear combination of the explanatory variables - i. e. the fisrt big assumption associated with a linear model is linearity. Generally, it is useful to assume also, that the errors are normally distributed and moreover, with a mean of 0 and a constant variance. This includes also the notion that the errors are not correlated and that the size of an error does not depend on the explanatory variables. There are a number of graphical ways to explore these assumptions, for example:
+
+**The Residuals vs. Fitted values -plot**
+The Residuals vs. Fitted values -plot explores the constant variance assumption of the errors in the model, in other words the assumption that there should be no or close to none dependency between the errors and the explanatory variables. The simple plot shows residuals and model predictions, and if there seems to be any pattern in the plot, one could conclude that there is some dependency and the variance of the errors is not constant.
+
+In the plot of the model, the points seem to be distributed quite randomly, and no actual pattern can really be seen. The curve fitted to these points is also rather vertical, with no deviation or slope differing from 1, so it is a good sign that there is no dependency of the errors on the explanatory variables. In this case, I would say that the variance seems to be constant, and this assumption of the linear model holds true.
+
+**The Normal QQ-plot**
+The Normal QQ-plot is a plot of the residuals that can be used to explore the assumption of the normality of the errors in the model. In the Normal QQ-plot of the model in question, the points of the plot seem to fall pretty nicely on the curve, and nothing seems to deviate out of the line. Consequently, according to this graphical model validation plot, the model's errors are (at least close to being) normally distributed and the normality assumption is correct.
+
+**The Residual vs. Leverage -plot**
+
+The Residual vs. Leverage -plot measures, how much impact a single observation has on the model. By analyzing the plot, any observations that have a high impact on the model, can be identified. The model of the two explanatory variables affecting the points-variable, we can see that the scale of the Leverage-plot is not very wide - only from 0 to 0,05. This indicates, that no observation is stranded outside the plot, and if there are observations in the fringes of the plot, the distance to other observations is not so big. Also, all the observations seem to fall in the plot quite evenly, which in itself indicates that there are no single observations having unusually high impact on the model. So the linearity assumption can be said to be correct in this model.
+
+
+
 
 ## Conclusions
 
