@@ -4,20 +4,22 @@ rm(list = ls())
 
 # Reading the full Community and Crime data into R
 CommunityCrime <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/00211/CommViolPredUnnormalizedData.txt", sep=",", na.strings = c("?"))
+
 # The column names were given as a separate file, so I read it as a different data set.
 data <- read.table("columnnames1.txt", sep=",")
+
 # The data had another column that consisted of NA's; I didn't know what to do with it so I erased it.
 names <- data[,-2]
-# Assigned the names data as the column names for the dataset CommunityCrime
+
+# Assigning the names data as the column names for the dataset CommunityCrime
 colnames(CommunityCrime) = names
+
 # Seeing whether this worked out, and it seems that the column names were assigned correctly.
 colnames(CommunityCrime)
 
 
 # Summary of the CommunityCrime dataset
 summary(CommunityCrime)
-
-options(max.print=1000000) #maxprint, just in case
 
 #Accessing libraries
 library(gmodels) #accessed the gmodels-library
@@ -67,9 +69,6 @@ names(CommunityCrime11)
 # Checking whether this worked out - it did.
 
 
-# Write table and save the data into the working directory for furher use in linear regression for nearly all of the variables.
-write.table(CommunityCrime11, file = "CommunityCrime11.txt", sep = ",", col.names = TRUE, row.names = TRUE)
-
 # Configure data further: keep only interesting columns "ViolentCrimesPerPop", "population", "PctForeignBorn", "PctHomeless", "NumKindsDrugsSeiz", "PopDens","perCapInc", "PolicPerPop", "PctLess9thGrade","PctRecentImmig","NumInShelters", "racepctblack", "PctEmploy", "MalePctNevMarr", "PctWorkMom", "PctPopUnderPov", "NumStreet", "medIncome" and "PctPersDenseHous".
 
 keep_columns <- c("ViolentCrimesPerPop", "population", "PctForeignBorn","PctHomeless", "PopDens","perCapInc", "PctUsePubTrans", "PctLess9thGrade","PctRecentImmig","NumInShelters","PctUsePubTrans", "racepctblack", "PctEmploy", "MalePctNevMarr", "PctWorkMom", "PctPopUnderPov", "NumStreet", "medIncome", "PctPersDenseHous")
@@ -77,7 +76,19 @@ keep_columns <- c("ViolentCrimesPerPop", "population", "PctForeignBorn","PctHome
 CommunityCrime22 <- dplyr::select(CommunityCrime11, one_of(keep_columns))
 dim(CommunityCrime22) # 2215 observations, 18 variables.
 
+# Omit missing values from the data
+
+communityCrime221 <- na.omit(CommunityCrime22)
+dim(communityCrime221) # 1994 observations, 18 variables.
+
 # Write table and save the smaller data into working directory for working on linear regression.
-write.table(CommunityCrime22, file = "CommunityCrime22.txt", sep = ",", col.names = TRUE, row.names = TRUE)
+write.table(communityCrime221, file = "CommunityCrime22.txt", sep = ",", col.names = TRUE, row.names = TRUE)
 
+#Normalize the data:
+CommunityCrime22_sn <- data.Normalization(communityCrime221,type="n4",normalization="column")
 
+#Look at the summary:
+summary(CommunityCrime22_sn) 
+
+# Write table and save the data into working directory.
+write.table(communityCrime221, file = "CommunityCrime221.txt", sep = ",", col.names = TRUE, row.names = TRUE)

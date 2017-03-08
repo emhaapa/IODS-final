@@ -12,35 +12,35 @@ output:
     fig_width: 6
     fig_height: 4
     code_folding: hide
+    highlight: kate
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Final assignment: Linear regression on Communities and Crime dataset{#anchor}
+# Final assignment: PCA and Linear regression on Communities and Crime dataset{#anchor}
 
-![optional caption text](stock-photo-financial-fraud-concept-145382752.jpg)
+![](stock-photo-financial-fraud-concept-145382752.jpg)
 
-This Course diary is related to the final assignment for the purpose of the course Introduction to Open Data Science of University of Helsinki, spring 2017. The aim of this assignment is to perform linear regression on the "Communities and crime"" dataset found in the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime) and validate the produced model through the model validation process introduced during the course.
+This Course diary is related to the final assignment for the purpose of the course Introduction to Open Data Science of University of Helsinki, spring 2017. The aim of this assignment is to perform linear regression on the "Communities and crime"" dataset found in the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime+Unnormalized#) and validate the produced model through the model validation process introduced during the course.
 
 ## The Communities and Crime data
 
-The data is the unnormalized version of the Communities and crime data set of Michael Redmond for Computer Science in La Salle University, Philadelphia, PA, USA. It describes the different aspects of crime and socio economic surroundings containing variables that might affect the crime rate in the U.S. communities. The dataset includes socio economic data from 1990 US Census, crime data from 1995 US FBI Uniform Crime Report and law enforcement data from 1990 US Law Enforcement Management and Administrative Statistics Survey (LEMAS), available from ICPSR at University of Michigan. The number of oservations in this dataset is 1994 and there are in total 128 variables, of which one - the total percentage of violent crimes - is considered a possible target variable and 5 non-predicive variables, such as state, county, community and community name. The rest of the 122 variables are considered predictive variables, among them for example the percentage of blacks in the community, the percentage of working moms and the number of officers assigned to special drug units. 
+The data is the unnormalized version of the [Communities and crime data set](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime+Unnormalized#) of Michael Redmond for Computer Science in La Salle University, Philadelphia, PA, USA. It describes the different aspects of crime and socio economic surroundings containing variables that might affect the crime rate in the U.S. communities. The dataset includes socio economic data from 1990 US Census, crime data from 1995 US FBI Uniform Crime Report and law enforcement data from 1990 US Law Enforcement Management and Administrative Statistics Survey (LEMAS), available from ICPSR at University of Michigan. The number of oservations in this dataset is 2215 and there are in total 147 variables, of which 18 - for example the total number of of violent crimes per population and the total number of non-violent crimes per population - are considered possible target variables to be predicted, and 5 non-predicive variables, such as state, county, community and community name. The rest of the variables are considered predictive variables, among them for example the percentage of blacks in the community, the percentage of working moms and the number of officers assigned to special drug units. 
 
-The population and the sum of all crimes considered violent was used in calculating the goal variable, per capita violent crimes. The interesting part in this process, according to the UCI Machine learning repository's data information page, was that there was controversy as to which kind of crimes diffeent states considered violent, which in turn led to numerous missing values in the data. Nearly all cities regarded murder, robbery, and assault as violent crimes, but some cities in midwestern states did not consider it necessary to add rape to this list, hence they were not included in the final Communities and crime data set. Before omitting those cities the "rapes" column had multiple missing values and that consequently resulted in misinterpreted values for the target variable. What I'd like to add, the rapes column still seems to 
+The population and the sum of all crimes considered violent was used in calculating the goal variable, per capita violent crimes. The interesting part in this process, according to the UCI Machine learning repository's data information page, was that there was controversy as to which kind of crimes diffeent states considered violent, which in turn led to numerous missing values in the data. Nearly all cities regarded murder, robbery, and assault as violent crimes, but some cities in midwestern states did not consider it necessary to add rape to this list, hence they were not included in the final Communities and crime data set. Before omitting those cities the "rapes" column had multiple missing values and that consequently resulted in misinterpreted values for the target variable.
+
+
+As the process of this exploration went on, I noticed it turned out to include a multitude of missing values. In order to delve into Primary Component Analysis with regard to this data, I came into the conclusion of performing na.omit on the data in the process of doing this exercise. Furthermore, I decided to choose the unnormalized data set instead of the normalized version, also available in the UCI repository, because the values in the data matrix seemed to be more easily comprehensible and comparable, whereas in the normalized data set all od the values were in the range of 0 to 1. What is more, the normalization performed on the data, I was afraid, would have left some extreme observations out. I learned that while performing linear regression, no standardization or normalization is essentially necessary, since the parameters and their signifigance is relatively the same whether performed on a standardized or an unstandardized data set. However, as normalization on the data was easy to perform I did it for the data and saved the data in a different file, but in the further summarizing explorations I will look at the unnormalized data because of the aforementioned reasons of the values being more easily comprehensible and comparable.
 
 As for why I chose this particular data set out of all the ones available in UCI machine learning repository alone, there are many reasons. First of all,  I wanted to have a look on a different data to all of the sets we explored durng the course, and see what I could do on my own. Secondly, but notof inferior importance, I am very interested in crime related data in general, and the relationships of different aspects of population and socio economic variables affecting the crime rate especially in the US. This was only further accelerated by the glimpse we had on a data set called Boston (included in the MASS package of the R software) during the IODS course, however, I felt like I wanted to have a more widespread look on the crime in the US - and as I stumbled uppon the Communities and Crime data set, it felt like the perfect one to go on an explore in my final project. 
 
-As the process of this exploration went on, I noticed it turned out to include a multitude of missing values. In order to delve into Primary Component Analysis with regard to this data, I came into the conclusion of performing na.omit on the data in the process of doing this exercise. Furthermore, I decided to choose the unnormalized data set instead of the normalized version, also available in the UCI repository, because the values in the data matrix seemed to be more easily comprehensible and comparable, whereas in the normalized data set all od the values were in the range of 0 to 1. What is more, the normalization performed on the data, I was afraid, would have left some extreme observations out. I learned that while performing linear regression, no standardization or normalization is essentially necessary, since the parameters and their signifigance is relatively the same whether performed on a standardized or an unstandardized data set. Also, a normalization on the data would be easy to perform for example with the data.Normalization()-function from the clusterSim-package in the following way:
-CommunityCrime22_sn <- data.Normalization (CommunityCrime22,type="n4",normalization="column"),
-where type = "n4" refers to the type of normalization - in this case "n4 - unitization with zero minimum ((x-min)/range)".
-
-
 ## The data wrangling process on the Communities and Crime data
 
-The data available in the UCI repository didn't contain names for the variables at all; they were only given in the description of the data in a list with descriptions of the variables included. Accordingly, before any data wrangling could be done, I created a list of column names in a separate .txt-file where I removed all other information in the variables list found on the data information page. In the R scrip where the data wrangling was done, i then assigned the column names in the data to be taken from this columnnames.txt-data, that I put saved into a separate object.
-The actual data wrangling process for this data set consisted of removing columns with numerous missing values and omitting some non-predictive variables that are not of interest in building a linear regression model (those included for example county, community and community name). In this phase, I created a data set called CommunityCrime11 that included all of the remaining variables, for my interest in fitting a linear regression model on all the variables. Furthermore, in the finalized data set I only kept some interesting variables that I hypothesized to have some kind of significant effect on the total crime variable. Those, accompanied with their descriptions found on the [data information page](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime+Unnormalized#) in the following list, were:
+The data available in the UCI repository didn't contain names for the variables at all; they were only given in the description of the data in a list with descriptions of the variables included. Accordingly, before any data wrangling could be done, I created a list of column names in a separate .txt-file where I removed all other information in the variables list found on the data information page. In the R scrip where the data wrangling was done, i then assigned the column names in the data to be taken from this columnnames.txt-data, that I saved into a separate object.
+
+The actual data wrangling process for this data can be found in this [link to my GitHub repository](https://github.com/emhaapa/IODS-final/blob/master/DataWrangling2.R). The process consisted of removing columns with numerous missing values and omitting some non-predictive variables that are not of interest in building a linear regression model (those included for example county, community and community name). Furthermore, in the finalized data set I only kept some interesting variables that I hypothesized to have some kind of significant effect on the total crime variable and which I determined didn't contain so many missing values as for example the LEMAS- and police related variables, and performed na.omit() on the data to get rid of the missing values. The variables in the data set, accompanied with their descriptions found on the [data information page](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime+Unnormalized#) in the following list, are:
 
 * **"ViolentCrimesPerPop"** =  total number of violent crimes per 100K population
 * **"population"** =  population for community
@@ -70,7 +70,7 @@ I also wanted the row names of this data to be distinctified by the community na
 
 First off, let's have a peek at the latter, smaller data with the variables mentioned in the preceding list through tables and plots.
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
+```{r figs, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE, fig.cap="\\label{fig:figs}Row names of the data"}
 # Accessing libraries:
 library(gmodels)
 library(gdata)
@@ -82,23 +82,38 @@ library(tidyverse)
 library(corrplot)
 library(GGally)
 library(stringr)
+
 options(max.print=1000000)
 
 CommunityCrime22 <- read.table('CommunityCrime22.txt', sep=",", header = TRUE)
-rownames(CommunityCrime22)
+CommunityCrime22n <- read.table('CommunityCrime221.txt', sep=",", header = TRUE) # Normalized data
+
+head(rownames(CommunityCrime22), 10)
+```
+
+
+As we can see from the initial exploration done with R's head()- and rownames()-functions, the row names actually do correspond with the communities in question.
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 str(CommunityCrime22)
+
 glimpse(CommunityCrime22)
 
 ```
 
-As we can see from the initial exploration done with R's rownames()- and glimpse()-functions, the row names actually do correspond with the communities in question and we can also have a look at which kind of values the included variables get: mostly numerical values. Let's now look at the summary of the data:
+We can also have a look at which kind of values the included variables get with str()- and glimpse()-functions: mostly numerical values. 
+Let's now look at the summary of the data:
 
-```{r, message=FALSE, warning=FALSE, cache=TRUE}
+
+```{r summary, message=FALSE, warning=FALSE, cache=TRUE}
+
 summary(CommunityCrime22)
 ```
 
 
-We can first spot that only the target variable ViolentCrimesPerPop includes missing values, 221 of them in total. This, among other reasons, is due to the missing values in rapes-column, which was whopping looking at the separate rapes-column in the original data set. Moreover, the values of violent crimes per population range from zero to almost 5 000 with a median at around 374, which tells us that there is variation between cities: some of them have a high rate of violent crimes whereas some of the cities don't seem to have violent crimes at all (minimum at zero). 
+We can see from the summary table that the values of violent crimes per population range from zero to almost 5 000 with a median at around 374, which tells us that there is variation between cities: some of them have a high rate of violent crimes whereas some of the cities don't seem to have violent crimes at all (minimum at zero). This is more easy to detect in the unnormalized version of the data, since the values are actual numbers of violent crimes instead of something between 0 and 1.
+
 From the summary of the population column it can be concluded that the data included small communities with as little as 10 005 in population, and also very large communities with a high number of people going up to over 7,3 million. This also affects the population density, which varies from 10 persons per square mile to a staggering 44 230 persons per square mile. What is interesting in the percent of foreign born people -column, is that it varies significantly: some communities have only 0,18 percent of foreign born recidents whereas the maximum is as high as 60,4 percent - more than a half of the people are foreign born in some communities. The same goes for racepctblack, the percent of people of African American heritage: the minimum is a straight zero, the median and mean are both quite low, but the maximum is 96,67 (!), extremely high.
 
 The next interesting columns are the number of homeless people in shelters - NumInShelters - and number of homeless people found in the streets - NumStreet - columns. We can see that the median for both is 0,00 and the mean for the first is 66,95 and for the latter 17,82. This tells about a significantly uneven distribution of homeless people in the communities - some communities have a large amount of homeless people, and most have none. The maximum values are high compared to the mean value: for homeless in shelters it is 23 383 and for homeless in the streets 10 447. This may be due to some communities being more urban and more populated, whereas there are many small, "countryside" communities (for example from the midwestern USA) in the data that probably have a smaller number of homeless people around (and people in general, for that matter).
@@ -108,22 +123,37 @@ The public transport and people in dense household columns also seem to present 
 The income related columns - medIncome, perCapInc and PctPopUnderPov - are also worth exploring. The latter presents a wide range of values with a low minimum and a high maximum. The median and mean are quite close to each other but rather far from the maximum value: generally the percent of people under the poverty rate is close to 10 percent, whereas in some cities over half of the people are under the poverty rate. The per capita income variable ranges from approximately 5 000 to 65 000, which is quite a wide range, peaking, however, at around 15 000. So most of the cities has a 15 thousand income per capita, but there are exceptionally high values as well as some low values.
 Median income has an even wider range of approximately 9 000 to some 122 000, wen the mean and median are around 30 000 - so some outlier communities are definitely present in the data.
 
-Let's look at the distributions and correlations more visually with ggpairs() and corrplot():
-```{r, fig.height=25, fig.width=15, message=FALSE, warning=FALSE, cache=TRUE}
+Let's look at the distributions and correlations more visually with ggpairs() and corrplot(), and let's also draw a pair-matrix of the normalized data set, just for fun:
+```{r GGP, fig.height=18, fig.width=25, message=FALSE, warning=FALSE, cache=TRUE}
 library(GGally)
+library(ggplot2)
+library(clusterSim)
 
-ggpairs(CommunityCrime22, mapping = aes(), lower = list(combo = wrap("facethist", bins = 10)), upper = list(continuous = wrap("cor", size=3)))
+
+lines1 <- function(data, mapping, ...){
+  p <- ggplot(data = data, mapping = mapping) + 
+    geom_point() + 
+    geom_smooth(method=lm, fill="blue", color="blue", ...)
+  p
+}
+
+
+g = ggpairs(CommunityCrime22, lower = list(continuous = lines1))
+p1 <- g + ggtitle("Communities and Crime: variables") 
+p1
+
+
 ```
 
 
+```{r, message=FALSE, warning=FALSE, cache=TRUE, include=FALSE}
+figs("CorP","Correlations between the variables in a visually informative correlation plot.")
+```
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
-CommunityCrime2211 <- na.omit(CommunityCrime22)
-summary(CommunityCrime2211)
-
-corrplot(round(cor(CommunityCrime2211), digits = 2), method = "circle", type = "upper", tl.pos = "d", tl.cex = 0.8)
+corrplot(round(cor(CommunityCrime22n), digits = 2), method = "circle", type = "upper", tl.pos = "d", tl.cex = 0.8)
 ```
 
-We can straight off see from the plots, that there isn't very much brightly standing out correlation with the variables in this data set with the supposed target variable, violent crimes per population. There is some slight correlation that can be detected from the latter corrplot, however, the variables correlate more strongly with each other than they do with violent crimes. The correlations are, however, the most obvious ones: for example the number of homeless people in the streets correlates positively with number of homeless in shelters, the latter two of which correlate positively with population, which somewhat confirms my initial ponderings of these being in connection. What is more, percent of foreign born correlates positively with percent of recently immigrated of population. Also percent of peopl eunder poverty rate correlates negatively with median income. Some of my earlier ponderings about foreign born people and dense housing being in connection turns out to be true looking at the corrplot-table: they seem to be in slight positive correlation.
+We can straight off see from the plots that the distributions of the variables are very skewed, except for PctEmployed, for example. We can also see that there isn't very much brightly standing out correlation with the variables in this data set with the supposed target variable, violent crimes per population. There is some slight correlation that can be detected from the latter corrplot, however, the variables correlate more strongly with each other than they do with violent crimes. The correlations are, however, the most obvious ones: for example the number of homeless people in the streets correlates positively with number of homeless in shelters, the latter two of which correlate positively with population, which somewhat confirms my initial ponderings of these being in connection. What is more, percent of foreign born correlates positively with percent of recently immigrated of population. Also percent of peopl eunder poverty rate correlates negatively with median income. Some of my earlier ponderings about foreign born people and dense housing being in connection turns out to be true looking at the corrplot-table: they seem to be in slight positive correlation.
 Since the purpose of this assignment is merely to exercise the abilities gained during this course, not necessarily to find interesting and eye-popping results, we can continue with this line of analysis despite the ggpairs- and corrplot presenting quite disillusioning results. 
 
 ## PCA on the Community and Crime data
@@ -137,7 +167,7 @@ To do that we need to convert the data set into a data frame and scale it - othe
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 library(clusterSim)
-CommunityCrime22111_s <- as.data.frame(scale(CommunityCrime2211))
+CommunityCrime22111_s <- as.data.frame(scale(CommunityCrime22n))
 
 summary(CommunityCrime22111_s)
 pcaCC2211_std <- prcomp(CommunityCrime22111_s) # Perform the PCA.
@@ -161,7 +191,7 @@ biplot(pcaCC2211_std, cex = c(0.8, 1), col = c("LightGray", "black"), xlab = pc_
 
 With the initial settings the plot wasn't exactly readable; because of the quite remarkable outliers (New York, for example) that made the scale of the x- and y-axii very wide. That's why I used xlim and ylim to limit the range of the axii and produce a more readable biplot. Now, from the above plot we can see from the direction of the arrows, which features contribute to either of the primary components. Clearly, percent of people in dense housing, percent of male persons never married, percent of homeless as well as violent crimes per population (our target variable for linear regression) percent of people with lower than or 9th grade education and percent of African Amrican of the population correlate with the first principal component. Also percent of working moms with under 18 year old kids seems to fall in this category, however, the arrow points to the opposite direction. Features that contribute to both of the first primary components but might contribute more to the PC2, are percent of people under poverty rate, median and per capita income and percent of employed people, which all have to do with income related aspects. These include also percent of people using public transport, percent of recently immigrated of population, number of homeless in the streets and in shelters, population and population density - population related features which also have to do with income. Furthermore, the angle between a single feature and the PC-axis can be interpreted as the correlation between these two, a small angle indicating strong positive correlation. The arrows which are in a close to 90 degrees angle with either PC1 or PC2 have close to a 0 correlation with these PCs, so only for percent of people in dense housing, percent of male persons never married, percent of homeless as well as violent crimes per population we can say for sure they are in almost no correlation with PC2, having only a small angle with PC1. 
 
-From the biplot we can also read the correlations _between_ the variables. For example, percent of people in dense housing, percent of male persons never married and percent of homeless seem to be in positive correlation with each other since the angle between them is nonexistent. There is also positive correlation between violent crime per population and the aforementioned features and percent of people with lower than or 9th grade education and percent of African Amrican of the population as well as percent of people under poverty rate seem to be in positive correlation with the target variable. The target variable and the income variables described plus the percent of employed people variable are in negative correlation: the corresponding arrows point to opposite directions.
+From the biplot we can also read the correlations _between_ the variables, which might be useful in . For example, percent of people in dense housing, percent of male persons never married and percent of homeless seem to be in positive correlation with each other since the angle between them is nonexistent. There is also positive correlation between violent crime per population and the aforementioned features and percent of people with lower than or 9th grade education and percent of African Amrican of the population as well as percent of people under poverty rate seem to be in positive correlation with the target variable. The target variable and the income variables described plus the percent of employed people variable are in negative correlation: the corresponding arrows point to opposite directions.
 
 
 ## Thoughts and hypotheses
@@ -170,7 +200,8 @@ From the Primary Component Analysis conducted in the previous passage, as well a
 
 
 * **"ViolentCrimesPerPop"** =  total number of violent crimes per 100K population (as the target variable, to be explained)
-* **"PctHomeless"** = number of homeless people in homeless shelters plus homeless in the street divided by population times 100
+* **"PctHomeless"** = number of homeless people in homeless shelters plus homeless in the street divided by population times 100 **OR**
+* **"NumStreet"** = number of homeless people counted in the street
 * **"perCapInc"** = per capita income
 * **"PctLess9thGrade"** = percentage of people 25 and over with less than a 9th grade education
 * **"racepctblack"** = percentage of population that is african american
@@ -187,6 +218,14 @@ My hypothesis at this point is that all of the above variables have a significan
 
 Linear regression provides a means to create simple statistical models that attempt to explain the relationship between a target variable and one or more explanatory variables, called simple regression and multiple regression, respectively. The linear model explains only a linear relationship between the variables, not any other kind of relationship or correlation, which encourages me to attempt to fit a model on this data despite the low correlations. The idea in the interpretation of the model is to look at the parameters - the intercept, which is called the alpha-parameter, and the "slope" which is called the beta-parameter and can be interpreted as the coefficient of the linear dependency between the explanatory variable and the target variable. 
 
+The summary table of the soon fitted models includes a value called **R-squared** - it is a statistical measure of how close the data are to the fitted regression line. It is also known as ‘the coefficient of determination’, or ‘the coefficient of multiple determination’ for multiple regression, as in this case. By definition, R-squared is the percentage of the response variable variation that is explained by a linear model. In other words: how well the model explains the main variables variation, as opposed to other factors that might affect the main variable. It can be written as
+
+*R-squared = Explained variation / total variation*
+
+R-squared is always between 0 and 100%: If R-squared is 0% that indicates the model explains none of the variability of the response data around its mean. If R-squared is 100% that indicates that the model explains all the variability of the response data around its mean.
+
+In general, the higher the R-squared, the better. 
+
 The validation of the soon produced model tackles the assumptions, on which the model is based - these include for example the normality and constant variance of the errors. The linear model in R can be fitted with lm()-function and the parameters of the model can be read from the summary-table produced by the regular summary-function:
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
@@ -195,56 +234,101 @@ library(ggplot2)
 library(GGally)
 
 # create a regression model with multiple explanatory variables
-my_model4 <- lm(ViolentCrimesPerPop ~ racepctblack + PctHomeless + PctEmploy + PctWorkMom + PctPersDenseHous + PctPopUnderPov + perCapInc + MalePctNevMarr+  PctLess9thGrade, data = CommunityCrime22)
+model0 <- lm(ViolentCrimesPerPop ~ racepctblack + PctHomeless + PctEmploy + PctWorkMom + PctPersDenseHous + PctPopUnderPov + perCapInc + MalePctNevMarr+  PctLess9thGrade, data = CommunityCrime22)
 
 # print out a summary of the model
-summary(my_model4)
+summary(model0)
 
 ```
 
 We can see from the summary-table that this initial approach didn't produce parameters corresponding to the variables that would all statistically significantly differ from zero. We can see that from the p-value column of the summary table: the statistical test produced p-values that aren't significant on any common significancy level, represented by * (stars) in the end of the rows. The statistical test related to the parameters is namely a test for the null-hypothesis that the beta-parameter in the regression model is actually zero. The p-value indicates the probability of that happening, using this statistical model. The influence of an explanatory variable is statistically significant, if it (in general) is <0,05. The highest value the p-value could take to be statistically at least somewhat significant, is 0,1.
 
-In the above summary-table, we can see that there are three variables, percent of people under poverty rate, per capita income and percent of male persons never married, for which the statistical test for the beta-parameter produced p-values that were under the generally used significancy levels.We can try to fit the model without these variables and see where it takes us, or remove a variable at a time. I tried both approaches, and it resulted in two equally nice models, one where I removed PctPopUnderPov + perCapInc + MalePctNevMarr+ +  PctLess9thGrade (first I removed all of the insignificant ones and was left with another insignificant variable, PctLess9thGrade, which I subsequently removed) and one where I removed PctLess9thGrade, MalePctNevMarr and PerCapInc, one at a time, which indicates that the percent of population under pverty rate doesn't influence the model in a significant way. Let's print the summary of the first model.
+In the above summary-table, we can see that there are three variables, percent of people under poverty rate, per capita income and percent of male persons never married, for which the statistical test for the beta-parameter produced p-values that were under the generally used significancy levels.We can try to fit the model without these variables and see where it takes us, or remove a variable at a time. I tried both approaches, and it resulted in two equally nice models, one where I removed PctPopUnderPov + perCapInc + MalePctNevMarr+ +  PctLess9thGrade (first I removed all of the insignificant ones and was left with another insignificant variable, PctLess9thGrade, which I subsequently removed) and one where I removed PctLess9thGrade, MalePctNevMarr and PerCapInc, one at a time, which indicates that the percent of population under pverty rate doesn't influence the model in a significant way. Let's print the summaries of all the models I tried.
 
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+
 # create a regression model with multiple explanatory variables
-CC22_lm <- lm(ViolentCrimesPerPop ~ racepctblack + PctHomeless + PctEmploy + PctWorkMom + PctPersDenseHous, data = CommunityCrime22)
+model1 <- lm(ViolentCrimesPerPop ~ racepctblack + PctHomeless + PctEmploy + PctWorkMom + PctPersDenseHous + PctPopUnderPov + MalePctNevMarr+  PctLess9thGrade, data = CommunityCrime22)
 
 # print out a summary of the model
-summary(my_model4)
-```
+summary(model1)
 
-```{r, message=FALSE, warning=FALSE}
 # create a regression model with multiple explanatory variables
-CC22_lm1 <- lm(ViolentCrimesPerPop ~ racepctblack + NumStreet+ PctWorkMom + MalePctNevMarr + perCapInc, data = CommunityCrime22)
- # tai + PctEmploy 
+model2 <- lm(ViolentCrimesPerPop ~ racepctblack + PctHomeless + PctEmploy + PctWorkMom + PctPersDenseHous +  PctLess9thGrade, data = CommunityCrime22)
+
 # print out a summary of the model
-summary(CC22_lm1)
+summary(model2)
+
+# create a regression model with multiple explanatory variables
+model3 <- lm(ViolentCrimesPerPop ~ racepctblack + PctHomeless + PctEmploy + PctWorkMom + PctPersDenseHous, data = CommunityCrime22)
+
+# print out a summary of the model
+summary(model3)
+
+# create a regression model with multiple explanatory variables / change the PctHomeless into NumStreet and PctPersDenseHous with MalePctNevMarr
+model4 <- lm(ViolentCrimesPerPop ~ racepctblack + NumStreet + PctEmploy + PctWorkMom + MalePctNevMarr, data = CommunityCrime22)
+
+# print out a summary of the model
+summary(model4)
+
+```
+
+```{r sum, message=FALSE, warning=FALSE, cache=TRUE, include=FALSE}
+library(stargazer)
+stargazer(model0, model1, model2, model3, model4, single.row=TRUE,title="Summaries of the models",
+align=TRUE,column.labels=c("model 0","model 1", "model 2", "model 3", "model 4"), type = 'html')
 ```
 
 
-KORJAA TÄÄ:
-reading from the table, the first estimate, i.e. the beta-parameter, is 3,5255 which indicates a strong positive influence on points. So a good attitude correlates with good points, simply said. The p-value for deep is 0.897, which is not at all a good p-value - it is significantly greater than 0,1, so the influence of deep on points cannot be considered statistically significant. For stra, the p-value is 0.0603, which is pretty good - it is close to 0,05 and definitely less than 0,1.
-The summary-table shows the beta-parameters for each of the aforementioned variables, and also that the p-value for ‘attitude’ is 0,0000000193 - which is by all means strictly less than 0,05! Now, with this model, at least for the attitude parameter, the probability of making a Type I -error (discarding error) is very little. For the other parameters, stra and surf, both have >0,1 p-values, which gives the results signifigance level to be quite low and the probability of making the Type I -error (of discaring the null hypothesis) slightly greater.
-The model parameters can be read from the summary-table. The alpha-parameter indicates, where the regression line intercepts the y-axis. In this case it is 8,9729. The beta-parameter for attitude in this model is 3,4658, which indicates a strong positive influence of attitude on exam points, i. e. the explanatory and target variable. The beta-parameter can be viewed as the slope of the curve which indicates the influence of this variable on the target variable; in this case the line is ascending. In the case of the stra-variable, the beta-parameter is a little bit smaller in value, but still positive, so it can be said that the strategic learning style has a positive influence on exam points - only a bit lesser of an influence than the attitude-variable has.
+<table style="text-align:center"><caption><strong>Summaries of the models</strong></caption>
+<tr><td colspan="6" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="5"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="5" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td colspan="5">ViolentCrimesPerPop</td></tr>
+<tr><td style="text-align:left"></td><td>model 0</td><td>model 1</td><td>model 2</td><td>model 3</td><td>model 4</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td></tr>
+<tr><td colspan="6" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">racepctblack</td><td>23.088<sup>***</sup> (0.775)</td><td>22.887<sup>***</sup> (0.768)</td><td>23.727<sup>***</sup> (0.706)</td><td>23.682<sup>***</sup> (0.704)</td><td>25.518<sup>***</sup> (0.783)</td></tr>
+<tr><td style="text-align:left">PctHomeless</td><td>812.075<sup>***</sup> (64.046)</td><td>811.679<sup>***</sup> (64.091)</td><td>820.859<sup>***</sup> (63.070)</td><td>825.413<sup>***</sup> (62.892)</td><td></td></tr>
+<tr><td style="text-align:left">NumStreet</td><td></td><td></td><td></td><td></td><td>0.195<sup>***</sup> (0.040)</td></tr>
+<tr><td style="text-align:left">PctEmploy</td><td>-4.278<sup>**</sup> (1.763)</td><td>-4.376<sup>**</sup> (1.764)</td><td>-7.176<sup>***</sup> (1.510)</td><td>-6.395<sup>***</sup> (1.274)</td><td>-7.259<sup>***</sup> (1.405)</td></tr>
+<tr><td style="text-align:left">PctWorkMom</td><td>-4.800<sup>***</sup> (1.831)</td><td>-3.292<sup>**</sup> (1.659)</td><td>-3.585<sup>**</sup> (1.650)</td><td>-3.834<sup>**</sup> (1.630)</td><td>-14.512<sup>***</sup> (1.674)</td></tr>
+<tr><td style="text-align:left">PctPersDenseHous</td><td>29.704<sup>***</sup> (2.439)</td><td>30.268<sup>***</sup> (2.423)</td><td>30.417<sup>***</sup> (2.345)</td><td>28.900<sup>***</sup> (1.739)</td><td></td></tr>
+<tr><td style="text-align:left">PctPopUnderPov</td><td>4.355<sup>*</sup> (2.352)</td><td>6.511<sup>***</sup> (2.075)</td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">perCapInc</td><td>-0.004<sup>*</sup> (0.002)</td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">MalePctNevMarr</td><td>-1.355 (1.390)</td><td>-1.860 (1.367)</td><td></td><td></td><td>7.379<sup>***</sup> (1.304)</td></tr>
+<tr><td style="text-align:left">PctLess9thGrade</td><td>-5.329<sup>**</sup> (2.356)</td><td>-4.756<sup>**</sup> (2.340)</td><td>-2.085 (2.161)</td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>883.017<sup>***</sup> (169.469)</td><td>702.793<sup>***</sup> (141.898)</td><td>881.191<sup>***</sup> (124.827)</td><td>837.024<sup>***</sup> (116.126)</td><td>1,563.326<sup>***</sup> (123.848)</td></tr>
+<tr><td colspan="6" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>1,994</td><td>1,994</td><td>1,994</td><td>1,994</td><td>1,994</td></tr>
+<tr><td style="text-align:left">R<sup>2</sup></td><td>0.557</td><td>0.556</td><td>0.554</td><td>0.554</td><td>0.458</td></tr>
+<tr><td style="text-align:left">Adjusted R<sup>2</sup></td><td>0.555</td><td>0.554</td><td>0.553</td><td>0.553</td><td>0.457</td></tr>
+<tr><td style="text-align:left">Residual Std. Error</td><td>410.091 (df = 1984)</td><td>410.377 (df = 1985)</td><td>411.187 (df = 1987)</td><td>411.180 (df = 1988)</td><td>453.023 (df = 1988)</td></tr>
+<tr><td style="text-align:left">F Statistic</td><td>277.235<sup>***</sup> (df = 9; 1984)</td><td>310.984<sup>***</sup> (df = 8; 1985)</td><td>411.377<sup>***</sup> (df = 6; 1987)</td><td>493.484<sup>***</sup> (df = 5; 1988)</td><td>336.478<sup>***</sup> (df = 5; 1988)</td></tr>
+<tr><td colspan="6" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="5" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>
 
-**R-squared** is a statistical measure of how close the data are to the fitted regression line. It is also known as ‘the coefficient of determination’, or ‘the coefficient of multiple determination’ for multiple regression, as in this case. By definition, R-squared is the percentage of the response variable variation that is explained by a linear model. In other words: how well the model explains the main variables variation, as opposed to other factors that might affect the main variable. It can be written as
+Reading from the individual tables and the latter summary table with more dense representation of all the models, we can see the parameters and the p-values for their statistical tests. However, let's first look at the R-Squared, Adjusted R-squared and and the F Statistics of the models to determine which model to explore further. As can be seen, the first model has the greatest R-Squared and accordingly, the greatest adjusted R-Squared of all the models, but that is merely due to the multitude of variables in the model: not all of them have statistically significant influence on the target variable. Hence, the first model has the lowest F-statistics, only 277,2 compared to the nearly two times as large, fourth model's corresponding value. It can be said that the larget the F-statistic value, the better. So determined by this principle, the fourth model should seem to be the best one. However, It can be seen that in the fourth model, the PctWorkMom variables influence is significant only at level 0,001, whereas in the fifth model, all of the variables beta-parameter differs from zero with extremely low, essentially zero, p-values, with significance levels of straight 0. When signifigance levels are this good, the probability of making the Type I -error (of discaring the null hypothesis) small. The fifth model also has the next best F-value, even though the explaining power (the R-Squared) of the model is only 0,45. 
 
-R-squared = Explained variation / total variation
+Based on these initial observations, I'm inclined to choose model number five as the final model to be explored and diagnosed. It has the least amount of variables but still it explains 0,45 percent of the response variable variation. The model contains explanatory variables racepctblack, NumStreet, PctEmploy, PctWorkMom and MalePctNevMarr; percent of African Americans, number of homeless people in the streets, percent of employed people of the population, percentage of moms of kids under 18 in labor force and percent of male persons who have never married.
 
-R-squared is always between 0 and 100%: If R-squared is 0% that indicates the model explains none of the variability of the response data around its mean. If R-squared is 100% that indicates that the model explains all the variability of the response data around its mean.
+The beta-parameter can be viewed as the slope of the curve which indicates the influence of this variable on the target variable. Reading from the summary table, the beta parameter for the first variable, percent of African American of the population, is 25,5, which means that when the african american population increases by one, the violent crimes increase by 25,5. This is a significant linear relationship, clearly, and could be intuitively thought of, at least based on the image the media produces of the state of the crime statistics in the U.S. It could be concluded that in areas with more African american people there are also more violent crimes per population.
 
-In general, the higher the R-squared, the better. Taking into consideration this notion, the multiple R-squared is 0,5538 and the Adjusted R-squared is 0,5527 (not remarkably lower, which indicated that the moel's variables explain (eti se sas tiedosto) adding a random variable in the model doesn't )
+The number of homeless found in the streets also has an influence on the target variable. The influence is not so strong as the previous variables', but still positive: when number of homeless in the streets increases by one the violent crimes increases by 0,19. There is of course no causality to be read from linear models, so we do not know which of the variables causes the increase in which variable, but seemingly in communities with more homeless people in the streets there is also more violent crime present. 
+
+As opposed to racepctblack and NumStreets, the next two variables have a significant negative linear impact on the target variable. It seems that when percent of employed of the population increases one unit, violent crime per population decreases by roughly seven units, since the beta-parameter is negative. Same goes for the percent of mothers of under 18-year old kids who are in work force; the decreasing impact on violent crime is -14,5 when percent of working moms increases. It is also very intuitive: unemployment might add to crime whereas being employment provides people with income and more stable living conditions. Also some other conclusions could be drawn, but they might be a bit off limits considering this is just linear regression - for example about the cultural backgrounds in which women and mothers choose to work and whether it could be a factor that affects the linear impact on violent crime. 
+
+The percent of male who have never been married has a positive beta-parameter of 7,4, which says that the unit increase in the share of men who have never married increases total number of violent crimes per population by 7,4 units. This could have many sorts of interpretations, of which one could be that single men could be more prone to commit violent crimes - or that in communities where there's a high number of violent crimes, also the men are single and not in stable relationships (marriage). For example in rural areas and small communities, men might be married and heads of the families, whereas in urban areas there would be more single men, say, gang members and such. 
+
+Let's move onto model validation to look at how well the assumptions of the linear model hold in case of this particular model.
 
 
 ## Model validation
 
-In this chapter we will graphically validate the model.
 
-```{r, message=FALSE, warning=FALSE}
 
-plot(CC22_lm1, which = c(2))
+```{r, message=FALSE, warning=FALSE, cache= TRUE}
+
+par(mfrow= c(2,2))
+plot(model4, which=c(1:2,5))
 
 ```
 
@@ -268,4 +352,12 @@ The Residual vs. Leverage -plot measures, how much impact a single observation h
 
 ## Conclusions
 
+Citations:
 
+U. S. Department of Commerce, Bureau of the Census, Census Of Population And Housing 1990 United States: Summary Tape File 1a & 3a (Computer Files), 
+
+U.S. Department Of Commerce, Bureau Of The Census Producer, Washington, DC and Inter-university Consortium for Political and Social Research Ann Arbor, Michigan. (1992) 
+
+U.S. Department of Justice, Bureau of Justice Statistics, Law Enforcement Management And Administrative Statistics (Computer File) U.S. Department Of Commerce, Bureau Of The Census Producer, Washington, DC and Inter-university Consortium for Political and Social Research Ann Arbor, Michigan. (1992) 
+
+U.S. Department of Justice, Federal Bureau of Investigation, Crime in the United States (Computer File) (1995) 
