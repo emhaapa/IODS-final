@@ -326,7 +326,7 @@ The percent of male who have never been married has a positive beta-parameter of
 
 To have a look at the single variables influence on the target variable, lets draw plots:
 
-```{r, message=FALSE, warning=FALSE, cache=TRUE}
+```{r, fig.height=19, fig.width=25, message=FALSE, warning=FALSE, cache=TRUE}
 library(visreg)
 par(mfrow = c(2,2))
 visreg(model4)
