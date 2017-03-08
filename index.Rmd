@@ -21,13 +21,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Abstract{#anchor}
 
-This course diary is for the purpose of exploring and analyzing the Communities and Crime in the US communities, as described in the upcoming passages. During the investigation I performed Primary Component Analysis on the data to reduce it's dimensions and see the relationships more clearly, and based on that as well as my own hypotheses and assumptions I fitted a Linear Model on the data. Using some socio-economic and population related variables as explanatory variables I attempted to predict the total number of violent crimes per 100 000 population in the US communities, resulting in a linear model that explains 45 percent of the total variability in violent crimes. 
+This Course diary is related to the final assignment for the purpose of the course Introduction to Open Data Science of University of Helsinki, spring 2017. My aim was to explore and analyze the Communities and Crime in the US communities, as described in the upcoming passages. During the investigation I performed Primary Component Analysis on the data to reduce it's dimensions and see the relationships more clearly, and based on that as well as my own hypotheses and assumptions I fitted a Linear Model on the data. Using some socio-economic and population related variables as explanatory variables I attempted to predict the total number of violent crimes per 100 000 population in the US communities, resulting in a linear model that explains 45 percent of the total variability in violent crimes. The percentage of African American people of the population seemed to be the most highly impacting variable in my model, but as opposed to how I predicted, immigration, income and the use of public transport related variables had less impact on the violent crimes variable.
 
 # PCA and Linear regression on Communities and Crime dataset{#anchor}
 
 ![](stock-photo-financial-fraud-concept-145382752.jpg)
 
-This Course diary is related to the final assignment for the purpose of the course Introduction to Open Data Science of University of Helsinki, spring 2017. The aim of this assignment is to perform linear regression on the "Communities and crime"" dataset found in the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime+Unnormalized#) and validate the produced model through the model validation process introduced during the course.
+The aim of this assignment is to perform both Primary Component Analysis and lLnear Regression on the "Communities and crime"" dataset found in the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Communities+and+Crime+Unnormalized#) and validate the produced model through the model validation process introduced during the course. My initial hypothesis is that at least the racial profile of the community and number of homeless people, as well as some employment status and immigration related variables, could have a relationship with the number of violent crimes per population.
 
 ## The Communities and Crime data
 
@@ -65,7 +65,7 @@ The actual data wrangling process for this data can be found in this [link to my
 * **"PctPersDenseHous"** = percent of persons in dense housing (more than 1 person per room) 
 * **"PctUsePubTrans"** = percent of people using public transit for commuting 
 
-As a side not, among all other interesting variables not included in the final data set, there was also a variable in the original data called **"RacialMatchCommPol"** = a measure of the racial match between the community and the police force, high values indicate proportions in community and police force are similar, which initially seemed quite interesting in terms of analysis. However, I decided not to include it in my wrangled data set as it contained a high number of missing values and in the end didn't seem to provide any information for some of the communities included in the data.
+As a side note, among all other interesting variables not included in the final data set, there was also a variable in the original data called **"RacialMatchCommPol"** = a measure of the racial match between the community and the police force, high values indicate proportions in community and police force are similar, which initially seemed quite interesting in terms of analysis. However, I decided not to include it in my wrangled data set as it contained a high number of missing values and in the end didn't seem to provide any information for some of the communities included in the data.
 
 I also wanted the row names of this data to be distinctified by the community names followed by the state column's character string indicating in which state this community is in, so I assigned the row names to be taken from those two columns and subsequently removed them from the dataset. The more tidy and comprehensible data set resulting from this data wrangling I called CommunityCrime22.
 
