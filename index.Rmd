@@ -1,5 +1,5 @@
 ---
-title: "Final Assignment"
+title: "Communities and Crime: Final Assignment"
 author: "Emma Haapa"
 date: "3 maaliskuuta 2017"
 output: 
@@ -19,7 +19,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Final assignment: PCA and Linear regression on Communities and Crime dataset{#anchor}
+# Abstract{#anchor}
+
+This course diary is for the purpose of exploring and analyzing the Communities and Crime in the US communities, as described in the upcoming passages. During the investigation I performed Primary Component Analysis on the data to reduce it's dimensions and see the relationships more clearly, and based on that as well as my own hypotheses and assumptions I fitted a Linear Model on the data. Using some socio-economic and population related variables as explanatory variables I attempted to predict the total number of violent crimes per 100 000 population in the US communities, resulting in a linear model that explains 45 percent of the total variability in violent crimes. 
+
+# PCA and Linear regression on Communities and Crime dataset{#anchor}
 
 ![](stock-photo-financial-fraud-concept-145382752.jpg)
 
@@ -318,6 +322,16 @@ As opposed to racepctblack and NumStreets, the next two variables have a signifi
 
 The percent of male who have never been married has a positive beta-parameter of 7,4, which says that the unit increase in the share of men who have never married increases total number of violent crimes per population by 7,4 units. This could have many sorts of interpretations, of which one could be that single men could be more prone to commit violent crimes - or that in communities where there's a high number of violent crimes, also the men are single and not in stable relationships (marriage). For example in rural areas and small communities, men might be married and heads of the families, whereas in urban areas there would be more single men, say, gang members and such. 
 
+To have a look at the single variables influence on the target variable, lets draw plots:
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+library(visreg)
+par(mfrow = c(2,2))
+visreg(model4)
+```
+
+These figures proved to be very visual: for example the outliers in the NumStreet can be seen to affect the model fit's slope very significantly.
+
 Let's move onto model validation to look at how well the assumptions of the linear model hold in case of this particular model.
 
 
@@ -336,28 +350,38 @@ plot(model4, which=c(1:2,5))
 In linear regression the assumptions include that the target variable is assumed to be a linear combination of the explanatory variables - i. e. the fisrt big assumption associated with a linear model is linearity. Generally, it is useful to assume also, that the errors are normally distributed and moreover, with a mean of 0 and a constant variance. This includes also the notion that the errors are not correlated and that the size of an error does not depend on the explanatory variables. There are a number of graphical ways to explore these assumptions, for example:
 
 **The Residuals vs. Fitted values -plot**
-The Residuals vs. Fitted values -plot explores the constant variance assumption of the errors in the model, in other words the assumption that there should be no or close to none dependency between the errors and the explanatory variables. The simple plot shows residuals and model predictions, and if there seems to be any pattern in the plot, one could conclude that there is some dependency and the variance of the errors is not constant.
 
-In the plot of the model, the points seem to be distributed quite randomly, and no actual pattern can really be seen. The curve fitted to these points is also rather vertical, with no deviation or slope differing from 1, so it is a good sign that there is no dependency of the errors on the explanatory variables. In this case, I would say that the variance seems to be constant, and this assumption of the linear model holds true.
+The Residuals vs. Fitted values -plot explores the constant variance assumption of the errors in the model, in other words the assumption that there should be no or close to none dependency between the errors and the explanatory variables. The simple plot shows residuals and model predictions; if there seems to be any pattern in the plot, ir could be concluded that there is some dependency present and the variance of the errors is not constant.
+
+In the plot of the model, the points seem to be distributed a little skewedly - the points range seems to widen from left to right, from dense to points with larger distances. The curve fitted to these points is rather horizontal, but with a little deviation, which points to a dependency of the errors on the explanatory variables. In this case, I would say that the variance might not necessarily be constant, and this assumption of the linear model could be questioned.
 
 **The Normal QQ-plot**
-The Normal QQ-plot is a plot of the residuals that can be used to explore the assumption of the normality of the errors in the model. In the Normal QQ-plot of the model in question, the points of the plot seem to fall pretty nicely on the curve, and nothing seems to deviate out of the line. Consequently, according to this graphical model validation plot, the model’s errors are (at least close to being) normally distributed and the normality assumption is correct.
+
+The Normal QQ-plot is a plot of the residuals that can be used to explore the assumption of the normality of the errors in the model. In the Normal QQ-plot of the model in question, the points of the plot seem to fall pretty nicely on the curve in the middle, but there is significant deviation in both of the ends. The values that cause the plot to turn upwards are New York and Los Angeles and such big cities where for example crime and population is high the variables. This makes think, whether the normalized data set would have been a better option to explore. Consequently, according to this graphical model validation plot, the model’s errors are not normally distributed and the normality assumption is not correct.
 
 **The Residual vs. Leverage -plot**
 
-The Residual vs. Leverage -plot measures, how much impact a single observation has on the model. By analyzing the plot, any observations that have a high impact on the model, can be identified. The model of the two explanatory variables affecting the points-variable, we can see that the scale of the Leverage-plot is not very wide - only from 0 to 0,05. This indicates, that no observation is stranded outside the plot, and if there are observations in the fringes of the plot, the distance to other observations is not so big. Also, all the observations seem to fall in the plot quite evenly, which in itself indicates that there are no single observations having unusually high impact on the model. So the linearity assumption can be said to be correct in this model.
+The Residual vs. Leverage -plot measures, how much impact a single observation has on the model. By analyzing the plot, any observations that have a high impact on the model, can be identified. The model of the two explanatory variables affecting the points-variable, we can see that the scale of the Leverage-plot is quite very wide - from 0 to 0,8. This indicates, that as there are observations stranded outside the plot, the distance to other observations is also rather big. Yet again, cities like New York and Los Angeles are outside the plot as outliers, which have a quite significant amount of leverage - New York is pointed out to be completely out of the Cook's distance lines that can be considered to be the indicators for whether the value has a big leverage. So the linearity assumption can be said to false in this model, because of remarkable outliers.
 
 
+## Conclusions violent crime
+
+While the dataset in itself is interesting, and the investigation in this course diary did prove to be at least entertaining, it seems that the exploration of this data provides some problems and leaves room for further processing. The problems aside, in the linear model finally fitted, it was found that the racepctblack, NumStreet, PctEmploy, PctWorkMom and MalePctNevMarr have a significant linear relationship with the violent crimes per population variable, which to me seemed interesting. Intuitive, for some part, but before conducting the analysis I would not have thought that for example percent of male persons who have never married would be in connection with violent crimes. It was maybe too intuitive to think of, as it was a little bit surprising to find out that the percent of employed people and mothers had a decresing impact on violent crimes - first I thought of homeless people being a much better indicator. 
+
+As for the problems, even though the linear model fitted based on the Primary Component Analysis results seemed promising at first, it turned out to produce quite skewed diagnostic plots and thus was not validated to sufficiently fulfill the assumptions of a linear model. Perhaps fitting the linear model on unnormalized dataset was a bad idea after all, seeing the significant outliers affecting the model diagnostics remarkably. The missing values also seemed to be a problem in case of Communities and Crime data, as some of the columns contained substantial amounts of NAs compared to the others and performing na.omit() on the whole dataset would have lead to roughly 200 observations. Accordingly, in the data wrangling phase of the process, I hold onto my will of preserving as many observations as possible from the original data in the wrangled data, as I believed choosing only a non-representative subset of all the observations I could be left with totally unrelated conclusions that have nothing to do with the original data. It also drove me to choose variables that had fewer missing values - whether there were more imfluencible variables in the data (policeforce-related variables perhaps) that could have explained more of the variability in the target variable, is left unknown. This is a good point for further analysis - or a reason for me to delve into the data once again.
 
 
-## Conclusions
+##Citations:
 
-Citations:
+Some citation requirements mentioned in the data information page of the UCI Machine Learning Repository:
 
-U. S. Department of Commerce, Bureau of the Census, Census Of Population And Housing 1990 United States: Summary Tape File 1a & 3a (Computer Files), 
+* U. S. Department of Commerce, Bureau of the Census, Census Of Population And Housing 1990 United States: Summary Tape File 1a & 3a (Computer Files), 
 
-U.S. Department Of Commerce, Bureau Of The Census Producer, Washington, DC and Inter-university Consortium for Political and Social Research Ann Arbor, Michigan. (1992) 
+* U.S. Department Of Commerce, Bureau Of The Census Producer, Washington, DC and Inter-university Consortium for Political and Social Research Ann Arbor, Michigan. (1992) 
 
-U.S. Department of Justice, Bureau of Justice Statistics, Law Enforcement Management And Administrative Statistics (Computer File) U.S. Department Of Commerce, Bureau Of The Census Producer, Washington, DC and Inter-university Consortium for Political and Social Research Ann Arbor, Michigan. (1992) 
+* U.S. Department of Justice, Bureau of Justice Statistics, Law Enforcement Management And Administrative Statistics (Computer File) U.S. Department Of Commerce, Bureau Of The Census Producer, Washington, DC and Inter-university Consortium for Political and Social Research Ann Arbor, Michigan. (1992) 
 
-U.S. Department of Justice, Federal Bureau of Investigation, Crime in the United States (Computer File) (1995) 
+* U.S. Department of Justice, Federal Bureau of Investigation, Crime in the United States (Computer File) (1995) 
+
+
+- As a final remark, I couldn't find how to produce captions in knitr or rmarkdown (as I first didn't know what that part of instructions meant and as I realized it, it was already too late) so I sincerely hope my work would suffice like this. -
