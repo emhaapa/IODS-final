@@ -1,6 +1,8 @@
 ---
 title: "Communities and Crime: Final Assignment"
 author: "Emma Haapa"
+contact:
+ email: emma.haapa@helsinki.fi
 date: "3 maaliskuuta 2017"
 output: 
   html_document:
